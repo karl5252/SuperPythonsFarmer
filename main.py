@@ -161,6 +161,20 @@ class GameManager:
                 current_player.update_herd({"Rabbit": 0})
                 self.main_herd[0].max_count += return_amount
         # # Case wolf is rolled
+        if result_green == "Wolf" or result_red == "Wolf":
+            print("Wolf was rolled. 'AuuuUUUUuuuu... Better hide your children'")
+            if current_player.get_herd()["Wolfhound"] > 0:
+                print("'Woof Woof motherfucker!' Wolfhound is in herd. No animals lost to wolf. Removing wolfhound.")
+                current_player.update_herd({"Wolfhound": current_player.get_herd()["Wolfhound"] - 1})
+            else:
+                print("Wolfhound not in herd. You lost it all save your old jade...") #jade means old horse
+                animals = current_player.get_herd()
+                for animal in animals:
+                    if animal == "Horse": break
+                    return_amount = current_player.get_herd()[animal]
+                    current_player.update_herd({animal: 0})
+                    self.main_herd[0].max_count += return_amount
+
         # # Case 1: Player has no animals in his herd
         if green_animal_count == 0 and red_animal_count == 0:
             print("No animals in player herd to update.")
