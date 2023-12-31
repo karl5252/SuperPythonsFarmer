@@ -21,6 +21,19 @@ class TestProcessDice(unittest.TestCase):
         player_herd = test_player.get_herd()
         self.assertEqual(1, player_herd["Rabbit"])
 
+    def test_given_is_two_pairs_in_player_herd_and_one_matching_animal_rolled_herd_is_updated_by_number_of_pairs(self):
+        """Test if herd is updated by number of pairs when matching animal is rolled."""
+        # given
+        test_player = Player()
+        test_player.update_herd({"Rabbit": 4})
+        test = test_player.get_herd()
+        game_manager = GameManager()
+        # when
+        game_manager.process_dice(test_player, "Rabbit", "Cow")
+        # then
+        player_herd = test_player.get_herd()
+        self.assertEqual(6, player_herd["Rabbit"])
+
     def test_given_is_two_pairs_in_player_herd_and_same_animals_rolled_herd_is_updated_by_number_of_pairs(self):
         """Test if herd is updated by number of pairs when same animals are rolled."""
         # given
@@ -102,6 +115,32 @@ class TestProcessDice(unittest.TestCase):
         self.assertEqual(0, player_herd["Cow"])
         self.assertEqual(1, player_herd["Horse"])
 
+    def test_given_is_all_animals_and_wolfhound_when_player_rolls_wolf_then_herd_is_intact_and_looses_wolfhound(self):
+        """Test if player looses only wolfhound when wolf is rolled."""
+        # given
+        test_player = Player()
+        test_player.update_herd({"Rabbit": 1})
+        test_player.update_herd({"Sheep": 1})
+        test_player.update_herd({"Pig": 1})
+        test_player.update_herd({"Cow": 1})
+        test_player.update_herd({"Horse": 1})
+        test_player.update_herd({"Wolfhound": 1})
+        test_player.update_herd({"Foxhound": 1})
+
+        test = test_player.get_herd()
+        game_manager = GameManager()
+        # when
+        game_manager.process_dice(test_player, "Rabbit", "Wolf")
+        # then
+        player_herd = test_player.get_herd()
+        self.assertEqual(1, player_herd["Rabbit"])
+        self.assertEqual(1, player_herd["Sheep"])
+        self.assertEqual(1, player_herd["Pig"])
+        self.assertEqual(1, player_herd["Cow"])
+        self.assertEqual(1, player_herd["Horse"])
+        self.assertEqual(0, player_herd["Wolfhound"])
+        self.assertEqual(1, player_herd["Foxhound"])
+
     def test_given_low_main_herd_when_player_rolls_matching_animals_then_max_count_not_dropped_below_zero(self):
         """Test if max_count is not dropped below zero when low main herd and player rolls matching animals."""
         # given
@@ -119,7 +158,7 @@ class TestProcessDice(unittest.TestCase):
         final_main_herd_count = game_manager.main_herd[0].max_count
 
         player_herd = test_player.get_herd()
-        self.assertEqual(4,player_herd["Rabbit"])  # 4 initial + none added
+        self.assertEqual(4, player_herd["Rabbit"])  # 4 initial + none added
 
         self.assertGreaterEqual(initial_main_herd_count,
                                 final_main_herd_count)  # Assert that max_count is not dropped below zero
