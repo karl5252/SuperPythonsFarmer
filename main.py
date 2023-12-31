@@ -171,20 +171,38 @@ class GameManager:
             if current_player.get_herd()[result_green] > 0:
                 current_count = current_player.get_herd()[result_green]
                 green_pairs = current_player.get_herd()[result_green] // 2
-                self.main_herd[0].max_count -= green_pairs
-                current_player.update_herd({result_green: current_count + green_pairs })
+                # self.main_herd[0].max_count -= green_pairs
+                if self.subtract_main_herd(result_green, green_pairs):
+                    current_player.update_herd({result_green: current_count + green_pairs})
             else:
                 if str(self.main_herd[0].__class__.__name__) == result_green:
-                    self.main_herd[0].max_count -= 1
-                    current_herd = current_player.get_herd()
-                    current_player.update_herd({result_green: current_herd[result_green] + 1})
-
-
+                    # self.main_herd[0].max_count -= 1
+                    if self.subtract_main_herd(result_green, 1):
+                        current_herd = current_player.get_herd()
+                        current_player.update_herd({result_green: current_herd[result_green] + 1})
 
         # # Case 3: Player has one animal that matches the dice
         # # Case 4: Green and red dice show the same animal
         # # Case 5: Player has a few pairs of animal type that was returned by either of the dice
         # # Case 6: Player rolls the dice and should be given the animal, however, there is none left in the main herd
+
+    def subtract_main_herd(self, animal_type: str, count: int) -> bool:
+        """Subtract count of animal_type from the main herd. Return True if successful, False otherwise.
+        :arg animal_type: Type of animal to subtract from the main herd
+        :arg count: Number of animals to subtract from the main herd
+        :return: True if successful, False otherwise"""
+        for animal in self.main_herd:
+            if isinstance(animal, Animal) and animal.__class__.__name__ == animal_type:
+                if animal.max_count - count >= 0:
+                    # If there are enough animals in the main herd, subtract the count
+                    animal.max_count -= count
+                    return True
+                else:
+                    # If not enough animals in the main herd, print an error message
+                    print(
+                        f"Error: Attempted to subtract {count} {animal_type}(s) from the main herd, but not enough "
+                        f"available.")
+                    return False
 
     def play(self):
         self.state = GameState.IN_GAME
