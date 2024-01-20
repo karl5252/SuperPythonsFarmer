@@ -127,7 +127,7 @@ class GameManager:
         print("6. The first Cow and Horse can only be obtained via exchange.")
         print("7. Beware of the Wolf - it eats all animals except Horses. Use a Wolfhound to chase it away.")
         print("8. The Fox eats all Rabbits unless you have a Foxhound.")
-        print("9. Goal: Collect all types of animals to win!")
+        print("9. Goals: Collect all types of animals to win!")
         print("10. Enjoy the game and have fun!")
         self.state = GameState.MAIN_MENU
 
@@ -238,6 +238,8 @@ class GameManager:
                         f"available.")
                     return False
 
+
+
     def play(self):
         self.state = GameState.IN_GAME
         for _ in range(len(self.players)):
@@ -252,6 +254,9 @@ class GameManager:
 
             # Alternate turn to the next player
             self.current_player_index = (self.current_player_index + 1) % len(self.players)
+
+    def process_exchange(self, test_player, animal_for_exchange, animal_to_exchange_for):
+        pass
 
 
 if __name__ == "__main__":

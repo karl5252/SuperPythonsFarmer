@@ -163,6 +163,26 @@ class TestProcessDice(unittest.TestCase):
         self.assertGreaterEqual(initial_main_herd_count,
                                 final_main_herd_count)  # Assert that max_count is not dropped below zero
 
+    #print("5. Exchange rules:")
+    #print(" - 6 Rabbits = 1 Sheep")
+   # print(" - 2 Sheep = 1 Pig")
+  #  print(" - 3 Pigs = 1 Cow")
+ #   print(" - 2 Cows = 1 Horse")
+
+    def test_given_player_exchanges_rabbits_for_sheep_then_herd_is_updated(self):
+        """Test if player exchanges rabbits for sheep then herd is updated."""
+        # given
+        test_player = Player()
+        test_player.update_herd({"Rabbit": 6})
+        game_manager = GameManager()
+
+        # when
+        game_manager.process_exchange(test_player, "Rabbit", "Sheep")
+        # then
+        player_herd = test_player.get_herd()
+        self.assertEqual(0, player_herd["Rabbit"])
+        self.assertEqual(1, player_herd["Sheep"])
+
 
 if __name__ == '__main__':
     unittest.main()
