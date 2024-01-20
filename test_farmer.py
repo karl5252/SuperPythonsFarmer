@@ -1,6 +1,6 @@
 import unittest
 
-from main import Player, GameManager
+from main import Player, GameManager, ExchangeBoard
 
 
 class TestProcessDice(unittest.TestCase):
@@ -175,6 +175,7 @@ class TestProcessDice(unittest.TestCase):
         test_player = Player()
         test_player.update_herd({"Rabbit": 6})
         game_manager = GameManager()
+        ExchangeBoard.set_exchange_rate("Rabbit", "Sheep", 6)
 
         # when
         game_manager.process_exchange(test_player, "Rabbit", "Sheep")
@@ -182,6 +183,66 @@ class TestProcessDice(unittest.TestCase):
         player_herd = test_player.get_herd()
         self.assertEqual(0, player_herd["Rabbit"])
         self.assertEqual(1, player_herd["Sheep"])
+
+    def test_given_player_exchanges_sheep_for_pig_then_herd_is_updated(self):
+        """Test if player exchanges sheep for pig then herd is updated."""
+        # given
+        test_player = Player()
+        test_player.update_herd({"Sheep": 2})
+        game_manager = GameManager()
+        ExchangeBoard.set_exchange_rate("Sheep", "Pig", 2)
+
+        # when
+        game_manager.process_exchange(test_player, "Sheep", "Pig")
+        # then
+        player_herd = test_player.get_herd()
+        self.assertEqual(0, player_herd["Sheep"])
+        self.assertEqual(1, player_herd["Pig"])
+
+    def test_given_player_exchanges_pig_for_cow_then_herd_is_updated(self):
+        """Test if player exchanges pig for cow then herd is updated."""
+        # given
+        test_player = Player()
+        test_player.update_herd({"Pig": 3})
+        game_manager = GameManager()
+        ExchangeBoard.set_exchange_rate("Pig", "Cow", 3)
+
+        # when
+        game_manager.process_exchange(test_player, "Pig", "Cow")
+        # then
+        player_herd = test_player.get_herd()
+        self.assertEqual(0, player_herd["Pig"])
+        self.assertEqual(1, player_herd["Cow"])
+
+    def test_given_player_exchanges_cow_for_horse_then_herd_is_updated(self):
+        """Test if player exchanges cow for horse then herd is updated."""
+        # given
+        test_player = Player()
+        test_player.update_herd({"Cow": 2})
+        game_manager = GameManager()
+        ExchangeBoard.set_exchange_rate("Cow", "Horse", 2)
+
+        # when
+        game_manager.process_exchange(test_player, "Cow", "Horse")
+        # then
+        player_herd = test_player.get_herd()
+        self.assertEqual(0, player_herd["Cow"])
+        self.assertEqual(1, player_herd["Horse"])
+
+    def test_given_player_exchanges_horse_for_cow_then_herd_is_updated(self):
+        """Test if player exchanges horse for cow then herd is updated."""
+        # given
+        test_player = Player()
+        test_player.update_herd({"Horse": 1})
+        game_manager = GameManager()
+        ExchangeBoard.set_exchange_rate("Horse", "Cow", 1)
+
+        # when
+        game_manager.process_exchange(test_player, "Horse", "Cow")
+        # then
+        player_herd = test_player.get_herd()
+        self.assertEqual(0, player_herd["Horse"])
+        self.assertEqual(2, player_herd["Cow"])
 
 
 if __name__ == '__main__':

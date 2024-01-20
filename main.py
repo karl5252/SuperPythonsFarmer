@@ -124,6 +124,8 @@ class GameManager:
         print(" - 2 Sheep = 1 Pig")
         print(" - 3 Pigs = 1 Cow")
         print(" - 2 Cows = 1 Horse")
+        print(" - 1 Sheep = 1 Foxhound")
+        print(" - 1 Cow = 1 Wolfhound")
         print("6. The first Cow and Horse can only be obtained via exchange.")
         print("7. Beware of the Wolf - it eats all animals except Horses. Use a Wolfhound to chase it away.")
         print("8. The Fox eats all Rabbits unless you have a Foxhound.")
@@ -206,7 +208,7 @@ class GameManager:
                     return
 
         # # Case 3: Player has one animal that matches the dice
-        if green_animal_count >= 1: #or red_animal_count >= 1:
+        if green_animal_count >= 1:  # or red_animal_count >= 1:
             print("Player has one animal that matches the dice. Increasing herd.")
             common_result = result_green
         else:
@@ -238,10 +240,17 @@ class GameManager:
                         f"available.")
                     return False
 
-
-
     def play(self):
         self.state = GameState.IN_GAME
+        # initialize exchange board rules
+        ExchangeBoard.set_exchange_rate("Rabbit", "Sheep", 6)
+        ExchangeBoard.set_exchange_rate("Sheep", "Pig", 2)
+        ExchangeBoard.set_exchange_rate("Pig", "Cow", 3)
+        ExchangeBoard.set_exchange_rate("Cow", "Horse", 2)
+
+        ExchangeBoard.set_exchange_rate("Sheep", "Foxhound", 1)
+        ExchangeBoard.set_exchange_rate("Cow", "Wolfhound", 1)
+
         for _ in range(len(self.players)):
             current_player = self.players[self.current_player_index]
             print(f"\n\n{current_player}'s Turn:")
@@ -249,14 +258,28 @@ class GameManager:
             print(f"Roll: {roll}")
             self.process_dice(current_player, roll[0], roll[1])
 
-            # self.roll_and_process_dice(current_player)
             print(current_player.get_herd())
 
             # Alternate turn to the next player
             self.current_player_index = (self.current_player_index + 1) % len(self.players)
 
-    def process_exchange(self, test_player, animal_for_exchange, animal_to_exchange_for):
-        pass
+    def process_exchange(self, player: Player, animal_for_exchange: str, animal_to_exchange_for: str) -> None:
+        """Process exchange of animals."""
+        player_herd = player.get_herd()
+        # check if player can to exchange
+        if player_herd[animal_for_exchange] >= ExchangeBoard.get_exchange_rate(animal_for_exchange,
+                                                                               animal_to_exchange_for):
+            # update player herd
+            player_herd[animal_for_exchange] -= ExchangeBoard.get_exchange_rate(animal_for_exchange,
+                                                                                animal_to_exchange_for)
+            player_herd[animal_to_exchange_for] += 1
+            # update main herd
+            self.main_herd[0].max_count += ExchangeBoard.get_exchange_rate(animal_for_exchange,
+                                                                           animal_to_exchange_for)
+            return
+        else:
+            print("Not enough animals to exchange!")
+            return
 
 
 if __name__ == "__main__":
