@@ -295,6 +295,12 @@ class GameManager:
                 else:
                     print("Please enter y or n")
 
+            # Check if player is a victor and has one of each animal from the list: Rabbit, Sheep, Pig, Cow, Horse
+            if set(current_player.get_herd().keys()) == {"Rabbit", "Sheep", "Pig", "Cow", "Horse"}:
+                print(f"Congratulations, {current_player}! You are a victor!")
+                self.state = GameState.GAME_OVER
+                break
+
             # Alternate turn to the next player
             self.current_player_index = (self.current_player_index + 1) % len(self.players)
 
