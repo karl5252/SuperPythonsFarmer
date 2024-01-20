@@ -201,25 +201,32 @@ class GameManager:
         if green_animal_count == 0 and red_animal_count == 0:
             if result_green == result_red:
                 print("Both dice match. Player receives the first animal.")
-                if str(self.main_herd[0].__class__.__name__) == result_green:
+                if self.main_herd[0].__class__.__name__ == result_green:
                     if self.subtract_main_herd(result_green, 1):
                         current_herd = current_player.get_herd()
                         current_player.update_herd({result_green: current_herd[result_green] + 1})
             else:
                 print("No animals in player herd to update.")
-            return
+            #return
 
-            # # Case 2: Dice results match, calculate number of pairs he has and add to herd OR add player one animal
+        # # Case 2: Dice results match, calculate number of pairs he has and add to herd OR add player one animal
         if result_green == result_red:
             print("Same animal on both dice. Increasing herd.")
             common_result = result_green
+            herd = current_player.get_herd()
+            test = common_result in current_player.get_herd()
 
             # Check if the common_result is in the player's herd and if the count is even (indicating a pair)
-            if common_result in current_player.get_herd() and current_player.get_herd()[common_result] % 2 == 0:
+            if common_result in current_player.get_herd() and current_player.get_herd()[common_result] > 0:
                 pairs = current_player.get_herd()[common_result] // 2
                 if self.subtract_main_herd(common_result, pairs):
                     current_player.update_herd({common_result: current_player.get_herd()[common_result] + pairs})
                     return
+            else:
+                # If the common_result is not in the player's herd, add one to the player's herd
+                self.subtract_main_herd(common_result, 1)
+                current_player.update_herd({common_result: current_player.get_herd().get(common_result, 0) + 1})
+                test = 0
 
         # # Case 3: Player has one animal that matches the dice
         if green_animal_count >= 1:  # or red_animal_count >= 1:
@@ -265,6 +272,28 @@ class GameManager:
             self.process_dice(current_player, roll[0], roll[1])
 
             print(current_player.get_herd())
+            # add while loop for player to stop and let him decide to perform an exchange
+            while True:
+                print("Do you want to perform an exchange? (y/n)")
+                answer = input()
+                if answer == "y":
+                    print("Exchange rules (works both ways!):")
+                    print(" - 6 Rabbits = 1 Sheep")
+                    print(" - 2 Sheep = 1 Pig")
+                    print(" - 3 Pigs = 1 Cow")
+                    print(" - 2 Cows = 1 Horse")
+                    print(" - 1 Sheep = 1 Foxhound")
+                    print(" - 1 Cow = 1 Wolfhound")
+                    print("Which animal do you want to exchange?")
+                    animal_for_exchange = input()
+                    print("Which animal do you want to exchange for?")
+                    animal_to_exchange_for = input()
+                    self.process_exchange(current_player, animal_for_exchange, animal_to_exchange_for)
+                    print(current_player.get_herd())
+                elif answer == "n":
+                    break
+                else:
+                    print("Please enter y or n")
 
             # Alternate turn to the next player
             self.current_player_index = (self.current_player_index + 1) % len(self.players)
