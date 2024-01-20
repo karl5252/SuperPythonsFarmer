@@ -5,21 +5,32 @@ from parameterized import parameterized as parametrized
 from main import Player, GameManager, ExchangeBoard
 
 
-class TestProcessDice(unittest.TestCase):
+class CommonSetupTeardown(unittest.TestCase):
+    """Common setup and teardown for all tests."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.game_manager = GameManager()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.game_manager = None
+
     def setUp(self):
         self.test_player = Player()
-        self.game_manager = GameManager()
 
     def tearDown(self):
         self.test_player = None
-        self.game_manager = None
+
+
+class TestProcessDice(CommonSetupTeardown):
 
     def test_given_is_empty_player_herd_and_different_animals_rolled_herd_is_not_updated(self):
         """Test if herd is not updated when different animals are rolled."""
         self.game_manager.process_dice(self.test_player, "Rabbit", "Sheep")
         player_herd = self.test_player.get_herd()
         for animal_type in player_herd.values():
-            self.assertEqual(0, animal_type, )
+            self.assertEqual(0, animal_type, )  # fails, updates are not done with cls.test_player.update_herd()
 
     def test_given_is_empty_player_herd_and_same_animals_rolled_herd_is_updated_by_one(self):
         """Test if herd is updated by one when same animals are rolled."""
@@ -31,10 +42,7 @@ class TestProcessDice(unittest.TestCase):
     def test_given_is_two_pairs_in_player_herd_and_one_matching_animal_rolled_herd_is_updated_by_number_of_pairs(self):
         """Test if herd is updated by number of pairs when matching animal is rolled."""
         # given
-
         self.test_player.update_herd({"Rabbit": 4})
-        test = self.test_player.get_herd()
-
         # when
         self.game_manager.process_dice(self.test_player, "Rabbit", "Cow")
         # then
@@ -44,10 +52,7 @@ class TestProcessDice(unittest.TestCase):
     def test_given_is_two_pairs_in_player_herd_and_same_animals_rolled_herd_is_updated_by_number_of_pairs(self):
         """Test if herd is updated by number of pairs when same animals are rolled."""
         # given
-
         self.test_player.update_herd({"Rabbit": 4})
-        test = self.test_player.get_herd()
-
         # when
         self.game_manager.process_dice(self.test_player, "Rabbit", "Rabbit")
         # then
@@ -57,21 +62,17 @@ class TestProcessDice(unittest.TestCase):
     def test_given_is_all_animals_but_no_foxhound_when_player_rolls_fox_then_looses_rabbits(self):
         """Test if player looses rabbits when fox is rolled."""
         # given
-
         self.test_player.update_herd({"Rabbit": 1})
         self.test_player.update_herd({"Sheep": 1})
         self.test_player.update_herd({"Pig": 1})
         self.test_player.update_herd({"Cow": 1})
         self.test_player.update_herd({"Horse": 1})
         self.test_player.update_herd({"Wolfhound": 1})
-
-        test = self.test_player.get_herd()
-
         # when
         self.game_manager.process_dice(self.test_player, "Rabbit", "Fox")
         # then
         player_herd = self.test_player.get_herd()
-        self.assertEqual(0, player_herd["Rabbit"])
+        self.assertEqual(0, player_herd["Rabbit"])  # fails, updates are not done with cls.test_player.update_herd()
 
     def test_given_is_all_animals_and_foxhound_when_player_rolls_fox_then_looses_foxhound_but_herd_is_intact(self):
         """Test if player looses only foxhound when fox is rolled."""
@@ -83,8 +84,6 @@ class TestProcessDice(unittest.TestCase):
         self.test_player.update_herd({"Horse": 1})
         self.test_player.update_herd({"Foxhound": 1})
         self.test_player.update_herd({"Wolfhound": 1})
-
-        test = self.test_player.get_herd()
         # when
         self.game_manager.process_dice(self.test_player, "Rabbit", "Fox")
         # then
@@ -106,13 +105,11 @@ class TestProcessDice(unittest.TestCase):
         self.test_player.update_herd({"Cow": 1})
         self.test_player.update_herd({"Horse": 1})
         self.test_player.update_herd({"Foxhound": 1})
-
-        test = self.test_player.get_herd()
         # when
         self.game_manager.process_dice(self.test_player, "Rabbit", "Wolf")
         # then
         player_herd = self.test_player.get_herd()
-        self.assertEqual(0, player_herd["Rabbit"])
+        self.assertEqual(0, player_herd["Rabbit"])  # fails, updates are not done with cls.test_player.update_herd()
         self.assertEqual(0, player_herd["Sheep"])
         self.assertEqual(0, player_herd["Pig"])
         self.assertEqual(0, player_herd["Cow"])
@@ -162,14 +159,7 @@ class TestProcessDice(unittest.TestCase):
                                 final_main_herd_count)  # Assert that max_count is not dropped below zero
 
 
-class TestExchangeRates(unittest.TestCase):
-    def setUp(self):
-        self.test_player = Player()
-        self.game_manager = GameManager()
-
-    def tearDown(self):
-        self.test_player = None
-        self.game_manager = None
+class TestExchangeRates(CommonSetupTeardown):
 
     @parametrized.expand([
         ("Horse", "Cow", 1 / 2, 2),
