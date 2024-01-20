@@ -84,6 +84,15 @@ class GameManager:
 
     def start_up(self):
         while True:
+            # initialize exchange board rules
+            ExchangeBoard.set_exchange_rate("Rabbit", "Sheep", 6)
+            ExchangeBoard.set_exchange_rate("Sheep", "Pig", 2)
+            ExchangeBoard.set_exchange_rate("Pig", "Cow", 3)
+            ExchangeBoard.set_exchange_rate("Cow", "Horse", 2)
+
+            ExchangeBoard.set_exchange_rate("Sheep", "Foxhound", 1)
+            ExchangeBoard.set_exchange_rate("Cow", "Wolfhound", 1)
+
             if self.state == GameState.MAIN_MENU:
                 self.main_menu()
             elif self.state == GameState.IN_GAME:
@@ -242,14 +251,7 @@ class GameManager:
 
     def play(self):
         self.state = GameState.IN_GAME
-        # initialize exchange board rules
-        ExchangeBoard.set_exchange_rate("Rabbit", "Sheep", 6)
-        ExchangeBoard.set_exchange_rate("Sheep", "Pig", 2)
-        ExchangeBoard.set_exchange_rate("Pig", "Cow", 3)
-        ExchangeBoard.set_exchange_rate("Cow", "Horse", 2)
 
-        ExchangeBoard.set_exchange_rate("Sheep", "Foxhound", 1)
-        ExchangeBoard.set_exchange_rate("Cow", "Wolfhound", 1)
 
         for _ in range(len(self.players)):
             current_player = self.players[self.current_player_index]
