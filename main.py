@@ -266,17 +266,32 @@ class GameManager:
     def process_exchange(self, player: Player, animal_for_exchange: str, animal_to_exchange_for: str) -> None:
         """Process exchange of animals."""
         player_herd = player.get_herd()
-        # check if player can to exchange
-        if player_herd[animal_for_exchange] >= ExchangeBoard.get_exchange_rate(animal_for_exchange,
-                                                                               animal_to_exchange_for):
-            # update player herd
-            player_herd[animal_for_exchange] -= ExchangeBoard.get_exchange_rate(animal_for_exchange,
-                                                                                animal_to_exchange_for)
-            player_herd[animal_to_exchange_for] += 1
-            # update main herd
-            self.main_herd[0].max_count += ExchangeBoard.get_exchange_rate(animal_for_exchange,
-                                                                           animal_to_exchange_for)
-            return
+        exchange_rate = ExchangeBoard.get_exchange_rate(animal_for_exchange, animal_to_exchange_for)
+
+        if exchange_rate > 1:
+            if player_herd[animal_for_exchange] >= exchange_rate:
+                # Update player's herd
+                player_herd[animal_for_exchange] -= exchange_rate
+                player_herd[animal_to_exchange_for] += 1
+
+                # Update main herd in both exchange directions
+                self.subtract_main_herd(animal_for_exchange, exchange_rate)
+                self.main_herd[0].max_count += 1
+
+                return
+        elif exchange_rate < 1:
+            # If direct exchange doesn't work, try the inverse exchange
+            inverse_exchange_rate = int(1 / exchange_rate)
+            if player_herd[animal_for_exchange] >= 1:
+                # Update player's herd
+                player_herd[animal_to_exchange_for] += inverse_exchange_rate
+                player_herd[animal_for_exchange] -= 1
+
+                # Update main herd in both exchange directions
+                self.subtract_main_herd(animal_to_exchange_for, inverse_exchange_rate)
+                self.main_herd[0].max_count += inverse_exchange_rate
+
+                return
         else:
             print("Not enough animals to exchange!")
             return
