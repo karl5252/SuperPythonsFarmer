@@ -270,7 +270,7 @@ class GameManager:
         player_herd = player.get_herd()
         exchange_rate = ExchangeBoard.get_exchange_rate(animal_for_exchange, animal_to_exchange_for)
 
-        if exchange_rate > 1:
+        if exchange_rate >= 1:
             if player_herd[animal_for_exchange] >= exchange_rate:
                 # Update player's herd
                 player_herd[animal_for_exchange] -= exchange_rate
