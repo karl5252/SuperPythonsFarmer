@@ -1,6 +1,7 @@
 import unittest
 
 from parameterized import parameterized as parametrized
+
 from main import Player, GameManager, ExchangeBoard
 
 
@@ -164,11 +165,8 @@ class TestProcessDice(unittest.TestCase):
         self.assertGreaterEqual(initial_main_herd_count,
                                 final_main_herd_count)  # Assert that max_count is not dropped below zero
 
-    # print("5. Exchange rules:")
-    # print(" - 6 Rabbits = 1 Sheep")
-    # print(" - 2 Sheep = 1 Pig")
-    #  print(" - 3 Pigs = 1 Cow")
-    #   print(" - 2 Cows = 1 Horse")
+
+class TestExchangeRates(unittest.TestCase):
 
     @parametrized.expand([
         ("Horse", "Cow", 1 / 2, 2),
@@ -176,7 +174,8 @@ class TestProcessDice(unittest.TestCase):
         ("Pig", "Sheep", 1 / 2, 2),
         ("Sheep", "Rabbit", 1 / 6, 6)
     ])
-    def test_given_player_invert_exchanges_animal_for_animal_then_herd_is_updated(self, from_animal, to_animal, ratio, expected_result):
+    def test_given_player_invert_exchanges_animal_for_animal_then_herd_is_updated(self, from_animal, to_animal, ratio,
+                                                                                  expected_result):
         """Test if player exchanges animal for animal then herd is updated."""
         # given
         test_player = Player()

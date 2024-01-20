@@ -90,6 +90,11 @@ class GameManager:
             ExchangeBoard.set_exchange_rate("Pig", "Cow", 3)
             ExchangeBoard.set_exchange_rate("Cow", "Horse", 2)
 
+            ExchangeBoard.set_exchange_rate("Horse", "Cow", 1 / 2)
+            ExchangeBoard.set_exchange_rate("Cow", "Pig", 1 / 3)
+            ExchangeBoard.set_exchange_rate("Pig", "Sheep", 1 / 2)
+            ExchangeBoard.set_exchange_rate("Sheep", "Rabbit", 1 / 6)
+
             ExchangeBoard.set_exchange_rate("Sheep", "Foxhound", 1)
             ExchangeBoard.set_exchange_rate("Cow", "Wolfhound", 1)
 
@@ -245,13 +250,12 @@ class GameManager:
                 else:
                     # If not enough animals in the main herd, print an error message
                     print(
-                        f"Error: Attempted to subtract {count} {animal_type}(s) from the main herd, but not enough "
+                        f"Attempted to subtract {count} {animal_type}(s) from the main herd, but not enough "
                         f"available.")
                     return False
 
     def play(self):
         self.state = GameState.IN_GAME
-
 
         for _ in range(len(self.players)):
             current_player = self.players[self.current_player_index]
