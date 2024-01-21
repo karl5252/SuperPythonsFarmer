@@ -157,7 +157,19 @@ class TestProcessDice(CommonSetupTeardown):
         self.assertEqual(4, player_herd["Rabbit"], "4 initial + none added")  # 4 initial + none added
 
         self.assertGreaterEqual(initial_main_herd_count,
-                                final_main_herd_count,  "Assert that max_count is not dropped below zero")  # Assert that max_count is not dropped below zero
+                                final_main_herd_count, "Assert that max_count is not dropped below zero")
+
+    def test_given_player_has_to_return_animals_main_herd_is_not_updated_over_the_max_value(self):
+        """Test if player returns animal then main herd is not updated over the max value."""
+        # given
+        self.test_player.update_herd({"Rabbit": 4})
+        self.game_manager.main_herd[0].max_count = 1  # set main herd Rabbit to one
+
+        # when
+        self.game_manager.process_dice(self.test_player, "Rabbit", "Fox")
+        final_main_herd_count = self.game_manager.main_herd[0].max_count
+
+        self.assertEqual(1, final_main_herd_count, "Assert that main herd is not updated over the max value")
 
     def test_given_player_has_animals_in_herd_when_player_rolls_matching_animals_then_herd_is_updated(self):
         """Test if herd is updated when player has animals in herd and player rolls matching animals al;bet other
