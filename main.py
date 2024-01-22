@@ -56,7 +56,8 @@ class Wolfhound(Animal):
 
 
 class Player:
-    def __init__(self):
+    def __init__(self, name=None):
+        self.name = name
         self.herd = {"Rabbit": 0, "Sheep": 0, "Pig": 0, "Cow": 0, "Horse": 0, "Foxhound": 0, "Wolfhound": 0}
 
     def get_herd(self):
@@ -82,7 +83,7 @@ class ExchangeBoard:
 
 class GameManager:
     def __init__(self):
-        self.players = [Player(), Player()]
+        self.players = [Player("Player 1"), Player("Player 2")]
         self.current_player_index = 0
         self.main_herd = [Rabbit(60), Sheep(24), Pig(20), Cow(12), Horse(6), Foxhound(4), Wolfhound(2)]
         self.exchange_board = ExchangeBoard()
@@ -96,18 +97,7 @@ class GameManager:
     def start_up(self):
         while True:
             # initialize exchange board rules
-            ExchangeBoard.set_exchange_rate("Rabbit", "Sheep", 6)
-            ExchangeBoard.set_exchange_rate("Sheep", "Pig", 2)
-            ExchangeBoard.set_exchange_rate("Pig", "Cow", 3)
-            ExchangeBoard.set_exchange_rate("Cow", "Horse", 2)
-
-            ExchangeBoard.set_exchange_rate("Horse", "Cow", 1 / 2)
-            ExchangeBoard.set_exchange_rate("Cow", "Pig", 1 / 3)
-            ExchangeBoard.set_exchange_rate("Pig", "Sheep", 1 / 2)
-            ExchangeBoard.set_exchange_rate("Sheep", "Rabbit", 1 / 6)
-
-            ExchangeBoard.set_exchange_rate("Sheep", "Foxhound", 1)
-            ExchangeBoard.set_exchange_rate("Cow", "Wolfhound", 1)
+            self.exchange_board_rules_setup()
 
             if self.state == GameState.MAIN_MENU:
                 self.main_menu()
@@ -115,6 +105,28 @@ class GameManager:
                 self.play()
             elif self.state == GameState.GAME_OVER:
                 self.game_over()
+
+    def exchange_board_rules_setup(self):
+        ExchangeBoard.set_exchange_rate("Rabbit", "Sheep", 6)
+        ExchangeBoard.set_exchange_rate("Sheep", "Pig", 2)
+        ExchangeBoard.set_exchange_rate("Pig", "Cow", 3)
+        ExchangeBoard.set_exchange_rate("Cow", "Horse", 2)
+        ExchangeBoard.set_exchange_rate("Horse", "Cow", 1 / 2)
+        ExchangeBoard.set_exchange_rate("Cow", "Pig", 1 / 3)
+        ExchangeBoard.set_exchange_rate("Pig", "Sheep", 1 / 2)
+        ExchangeBoard.set_exchange_rate("Sheep", "Rabbit", 1 / 6)
+        ExchangeBoard.set_exchange_rate("Sheep", "Foxhound", 1)
+        ExchangeBoard.set_exchange_rate("Cow", "Wolfhound", 1)
+        # Additional direct exchanges
+        ExchangeBoard.set_exchange_rate("Horse", "Pigs", 6)  # Exchange 1 Horse for 6 Pigs
+        ExchangeBoard.set_exchange_rate("Horse", "Sheep", 12)  # Exchange 1 Horse for 12 Sheep
+        ExchangeBoard.set_exchange_rate("Horse", "Rabbits", 72)  # Exchange 1 Horse for 72 Rabbits
+
+        ExchangeBoard.set_exchange_rate("Cow", "Sheep", 6)  # Exchange 1 Cow for 6 Sheep
+        ExchangeBoard.set_exchange_rate("Cow", "Rabbits", 36)  # Exchange 1 Cow for 36 Rabbits
+
+        ExchangeBoard.set_exchange_rate("Pig", "Rabbits", 12)  # Exchange 1 Pig for 12 Rabbits
+
 
     def main_menu(self):
         print("Welcome to Super Farmer!")
@@ -170,57 +182,88 @@ class GameManager:
         return result_green, result_red
 
     def process_dice(self, current_player: Player, result_green: str, result_red: str):
-        """Process the dice roll and update the player's herd accordingly."""
         green_animal_count = current_player.get_herd().get(result_green, 0)
         red_animal_count = current_player.get_herd().get(result_red, 0)
 
-        # Case fox is rolled
-        if result_green == "Fox" or result_red == "Fox":
-            self.handle_fox(current_player)
-
         # Case wolf is rolled
-        if result_green == "Wolf" or result_red == "Wolf":
+        if "Wolf" in [result_green, result_red]:
             self.handle_wolf(current_player)
+            return
 
-        # Case both dice match  and player has at least one animal of that type
-        if result_green == result_red and green_animal_count >= 1:
-            print("Same animal on both dice. Increasing herd.")
-            common_result = result_green
-            pairs = green_animal_count // 2
-            success, subtracted_count = self.subtract_main_herd(common_result, pairs)
-            if success:
-                lower_val = min(subtracted_count, pairs)
-                current_player.update_herd({common_result: current_player.get_herd()[common_result] + lower_val})
-                return
+        # Case fox is rolled
+        if "Fox" in [result_green, result_red]:
+            self.handle_fox(current_player)
+            return
 
-        # Case player has a pair of animals of the same type
-        if green_animal_count >= 2:
-            print("Player has a pair of animals. Increasing herd.")
-            common_result = result_green
-            pairs = green_animal_count // 2
-            success, subtracted_count = self.subtract_main_herd(common_result, pairs)
-            if success:
-                lower_val = min(subtracted_count, pairs)
-                current_player.update_herd({common_result: current_player.get_herd()[common_result] + lower_val})
-                return
-
-        # Case player does not have the animal but rolls a pair
-        if green_animal_count == 0 and result_green == result_red:
-            print("Player does not have the animal but rolls a pair. Increasing herd.")
-            common_result = result_green
-            success, subtracted_count = self.subtract_main_herd(common_result, 1)
-            if success:
-                current_player.update_herd({common_result: current_player.get_herd().get(common_result, 0) + 1})
-                return
-
-        # Case both dice match
+        # case dices match
+        # if there is no animal in the herd then add one
         if result_green == result_red:
-            print("Both dice match. Player receives the first animal.")
-            if self.main_herd[0].__class__.__name__ == result_green:
-                success, subtracted_count = self.subtract_main_herd(result_green, 1)
+            if green_animal_count == 0:
+                success, leftover = self.subtract_main_herd(result_green, 1)
                 if success:
-                    current_herd = current_player.get_herd()
-                    current_player.update_herd({result_green: current_herd.get(result_green, 0) + subtracted_count})
+                    current_player.update_herd({result_green: green_animal_count + 1})
+            else:
+                # if there is an animal in the herd then add number of pairs using substract method to do it safely
+                will_be_pair = (green_animal_count + 1) // 2
+                success, leftover = self.subtract_main_herd(result_green, will_be_pair)
+                if success:
+                    current_player.update_herd({result_green: green_animal_count + leftover})
+        # if there are animals in the herd then add number of pairs
+        else:
+            if green_animal_count != 0:
+                success, leftover = self.subtract_main_herd(result_green, 1)
+                if success:
+                    current_player.update_herd({result_green: green_animal_count + 1})
+            if red_animal_count != 0:
+                success, leftover = self.subtract_main_herd(result_red, 1)
+                if success:
+                    current_player.update_herd({result_red: red_animal_count + 1})
+
+        # case dices does not match
+        if result_green != result_red:
+            if green_animal_count != 0:
+                # if we will have a pair of animals when we add temporarily rolled animal to our animal count then add
+                # number of pairs
+                test = green_animal_count // 2
+                will_be_pair = (green_animal_count + 1) // 2
+                if will_be_pair == 0:
+                    # count number of pairs to add proper number using substract_main_herd to ensure proper number is
+                    # added to player and proper number subtracted from main herd
+                    number_of_pairs = will_be_pair
+                    for animal in self.main_herd:
+                        if isinstance(animal, Animal) and animal.__class__.__name__ == result_green:
+                            success, leftover = self.subtract_main_herd(result_green, number_of_pairs)
+                            if success:
+                                current_player.update_herd({result_green: green_animal_count + number_of_pairs})
+                                break
+                            else:
+                                number_of_pairs = leftover
+                elif green_animal_count // 2 > 0:
+                    # if number of animals is even then just add number of pairs
+                    success, leftover = self.subtract_main_herd(result_green, green_animal_count // 2)
+                    if success:
+                        current_player.update_herd({result_green: green_animal_count + leftover})
+                    # if no animal of this type in player herd then don`t add
+                else:
+                    return
+            # the same calculation for red dice
+            if red_animal_count != 0:
+                will_be_pair = (red_animal_count + 1) // 2
+                if will_be_pair == 0:
+                    number_of_pairs = will_be_pair
+                    for animal in self.main_herd:
+                        if isinstance(animal, Animal) and animal.__class__.__name__ == result_red:
+                            success, leftover = self.subtract_main_herd(result_red, number_of_pairs)
+                            if success:
+                                current_player.update_herd({result_red: red_animal_count + number_of_pairs})
+                                break
+                            else:
+                                number_of_pairs = leftover
+                elif red_animal_count // 2 > 0:
+                    success, leftover = self.subtract_main_herd(result_red, red_animal_count // 2)
+                    if success:
+                        current_player.update_herd({result_red: red_animal_count + leftover})
+                else:
                     return
 
     def subtract_main_herd(self, animal_type: str, count: int) -> tuple[bool, int]:
@@ -250,7 +293,7 @@ class GameManager:
 
         for _ in range(len(self.players)):
             current_player = self.players[self.current_player_index]
-            print(f"\n\n{current_player}'s Turn:")
+            print(f"\n\n{current_player.name}'s Turn:")
             roll = self.roll_dice()
             print(f"Roll: {roll}")
             self.process_dice(current_player, roll[0], roll[1])
