@@ -3,51 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Super Farmer</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>Super Python Farmer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('static/img/background.png');  /* static/background.png */
+            background-repeat: repeat;
+            background-size: auto;
+            background-color: #f0f0f0;  /* Fallback background color */
+            text-align: center;
+        }
+        #title-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 50px;
+        }
+        #title {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 0 20px;
+            color: white;  /* Set a contrasting text color */
+            text-shadow: 2px 2px 4px #000000;  /* Add shadow to make it pop */
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.5);  /* Optional: Transparent background for readability */
+            border-radius: 8px;  /* Optional: Rounded corners on the background */
+        }
+        .image-placeholder {
+            width: 150px;
+            height: 150px;
+            background-color: #cccccc;
+            display: inline-block;
+        }
+        #menu {
+            margin-top: 30px;
+        }
+        .menu-button {
+            display: block;
+            width: 400px;    /* Set a fixed width to align them nicely */
+            margin: 20px auto;  /* Center the buttons horizontally */
+            padding: 20px 40px;
+            font-size: 24px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+        .menu-button.easy { background-color: #90EE90; } /* Green for Easy (2-player) */
+        .menu-button.medium { background-color: #FFD700; } /* Yellow for Medium (3-player) */
+        .menu-button.hard { background-color: #FF6347; } /* Red for Hard (4-player) */
+        .menu-button.instructions { background-color: #1E90FF; } /* Blue for Instructions */
+        .menu-button:hover { opacity: 0.9; }
+        .menu-button:hover {
+            background-color: #45a049;
+        }
+        #instructions {
+            text-align: left;
+            margin: 20px auto;
+            padding: 10px;
+            width: 60%;
+            background-color: white;
+            border: 1px solid #ddd;
+            display: none;  /* Initially hidden */
+        }
+    </style>
 </head>
 <body>
-    <h1>Super Farmer Game</h1>
 
-    <div>
-        <button id="roll-dice-btn">Roll Dice</button>
-        <p id="dice-result"></p>
+    <div id="title-container">
+        <div class="image-placeholder" id="image-left"></div>
+        <div id="title">Super Python Farmer</div>
+        <div class="image-placeholder" id="image-right"></div>
     </div>
 
-    <div>
-        <h2>Player 1's Herd</h2>
-        <button id="get-herd-btn">Get Player 1 Herd</button>
-        <p id="herd-result"></p>
+    <div id="menu">
+        <button class="menu-button easy" id="2-player-btn">2 - Player Game (Easy)</button>
+        <button class="menu-button medium" id="3-player-btn">3 - Player Game (Medium)</button>
+        <button class="menu-button hard" id="4-player-btn">4 - Player Game (Hard)</button>
+        <button class="menu-button instructions" id="instructions-btn">Instructions</button>
+        <p id="menu-result"></p>
     </div>
 
-    <div>
-        <button id="check-victory-btn">Check Victory</button>
-        <p id="victory-result"></p>
-    </div>
+    <div id="instructions"></div>
 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        $(document).ready(function() {
-            // Roll Dice Button
-            $('#roll-dice-btn').click(function() {
-                $.post('/roll-dice', function(data) {
-                    $('#dice-result').text(`Green Dice: ${data.green}, Red Dice: ${data.red}`);
+                $(document).ready(function() {
+            // Start 2-Player Game
+            $('#2-player-btn').click(function() {
+                $.ajax({
+                    url: '/process-menu',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ choice: '2', players: 2 }),  // Pass the player count
+                    success: function(data) {
+                        $('#menu-result').html(data.message);
+                    }
                 });
             });
 
-            // Get Player 1 Herd Button
-            $('#get-herd-btn').click(function() {
-                $.get('/get-herd/0', function(data) {
-                    $('#herd-result').text(JSON.stringify(data.herd));
+            // Start 3-Player Game
+            $('#3-player-btn').click(function() {
+                $.ajax({
+                    url: '/process-menu',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ choice: '2', players: 3 }),  // Pass the player count
+                    success: function(data) {
+                        $('#menu-result').html(data.message);
+                    }
                 });
             });
 
-            // Check Victory Button
-            $('#check-victory-btn').click(function() {
-                $.get('/check-victory/0', function(data) {
-                    $('#victory-result').text(`Victory: ${data.victory}`);
+            // Start 4-Player Game
+            $('#4-player-btn').click(function() {
+                $.ajax({
+                    url: '/process-menu',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ choice: '2', players: 4 }),  // Pass the player count
+                    success: function(data) {
+                        $('#menu-result').html(data.message);
+                    }
+                });
+            });
+
+            // Instructions Button
+            $('#instructions-btn').click(function() {
+                $.ajax({
+                    url: '/process-menu',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ choice: '1' }),  // '1' for instructions
+                    success: function(data) {
+                        $('#instructions').html(data.message.replace(/\n/g, '<br>')).show();  // Show instructions
+                    }
                 });
             });
         });
     </script>
+
 </body>
 </html>

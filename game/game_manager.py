@@ -59,69 +59,61 @@ class GameManager:
     """class to manage the game."""
 
     def __init__(self):
-        self.players = list() #[Player("Player 1"), Player("Player 2")]
+        self.players = []
         self.current_player_index = 0
         self.main_herd = [Rabbit(60), Sheep(24), Pig(20), Cow(12), Horse(6), Foxhound(4), Wolfhound(2)]
-        self.exchange_board = ExchangeBoard()
         self.exchange_requests = []  # List of active exchange requests
         self.state = GameState.MAIN_MENU
 
-    def start_up(self):
+    def start_game(self):
         """Start the game."""
-        while True:
-            # initialize exchange board rules
-            exchange_board_rules_setup()
-
-            if self.state == GameState.MAIN_MENU:
-                self.main_menu()
-            elif self.state == GameState.IN_GAME:
-                self.play()
-            elif self.state == GameState.GAME_OVER:
-                self.game_over()
+        self.state = GameState.IN_GAME
+        exchange_board_rules_setup()
+        return "Game started. Players are now playing."
 
     def main_menu(self):
-        """Display the main menu."""
-        print("Welcome to Super Farmer!")
-
-        while True:
-            print("\n\n\nMAIN MENU")
-            print("1. Instructions")
-            print("2. Start Game")
-            print("3. Exit")
-
-            choice = input("Enter your choice: ")
-
-            if choice == "1":
-                self.show_instructions()
-            elif choice == "2":
-                self.play()
-                print("game start")
-                break
-            elif choice == "3":
-                print("bye")
-                exit()
+        """Return menu options instead of printing."""
+        return {
+            "1": "Show Instructions",
+            "2": "Start Game",
+            "3": "Exit"
+        }
 
     def show_instructions(self):
-        """Show game instructions."""
-        print("Super Farmer Game Instructions:")
-        print("1. Roll the dice to determine the animals you get.")
-        print("2. Each face of the dice represents a different animal:")
-        print(" - Cow, Pig, Rabbit, Sheep, Wolf, Fox, Horse.")
-        print("3. The first animals of a given type are obtained by rolling two of the same animal.")
-        print("4. If you have a pair of animals, you get the number of pairs instead of one.")
-        print("5. Exchange rules:")
-        print(" - 6 Rabbits = 1 Sheep")
-        print(" - 2 Sheep = 1 Pig")
-        print(" - 3 Pigs = 1 Cow")
-        print(" - 2 Cows = 1 Horse")
-        print(" - 1 Sheep = 1 Foxhound")
-        print(" - 1 Cow = 1 Wolfhound")
-        print("6. The first Cow and Horse can only be obtained via exchange.")
-        print("7. Beware of the Wolf - it eats all animals except Horses. Use a Wolfhound to chase it away.")
-        print("8. The Fox eats all Rabbits unless you have a Foxhound.")
-        print("9. Goals: Collect all types of animals to win!")
-        print("10. Enjoy the game and have fun!")
-        self.state = GameState.MAIN_MENU
+        """Return game instructions as a string instead of printing."""
+        return (
+            "Super Farmer Game Instructions:\n"
+            "1. Roll the dice to determine the animals you get.\n"
+            "2. Each face of the dice represents a different animal:\n"
+            " - Cow, Pig, Rabbit, Sheep, Wolf, Fox, Horse.\n"
+            "3. The first animals of a given type are obtained by rolling two of the same animal.\n"
+            "4. If you have a pair of animals, you get the number of pairs instead of one.\n"
+            "5. Exchange rules:\n"
+            " - 6 Rabbits = 1 Sheep\n"
+            " - 2 Sheep = 1 Pig\n"
+            " - 3 Pigs = 1 Cow\n"
+            " - 2 Cows = 1 Horse\n"
+            " - 1 Sheep = 1 Foxhound\n"
+            " - 1 Cow = 1 Wolfhound\n"
+            "6. The first Cow and Horse can only be obtained via exchange.\n"
+            "7. Beware of the Wolf - it eats all animals except Horses. Use a Wolfhound to chase it away.\n"
+            "8. The Fox eats all Rabbits unless you have a Foxhound.\n"
+            "9. Goals: Collect all types of animals to win!\n"
+            "10. Enjoy the game and have fun!\n\n\n"
+            "Visit my blog for more details: https://www.qabites.blog/\n\n\n"
+
+        )
+
+    def process_menu_choice(self, choice):
+        """Process the player's menu choice."""
+        if choice == "1":
+            return self.show_instructions()
+        elif choice == "2":
+            return self.start_game()
+        elif choice == "3":
+            return "Exiting game."
+        else:
+            return "Invalid choice."
 
     def process_dice(self, current_player: Player, result_green: str, result_red: str):
         """Process the dice roll results and update the player's herd accordingly."""
