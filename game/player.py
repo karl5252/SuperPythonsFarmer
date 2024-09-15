@@ -1,5 +1,3 @@
-from game.animal import Animal
-
 
 class Player:
     """class to represent a player in the game."""
@@ -20,6 +18,6 @@ class Player:
     def get_herd(self):
         return self.herd
 
-    def update_herd(self, animal: Animal, new_count: int):
+    def update_herd(self, animal: str, new_count: int):
         """Update herd with new dict"""
         self.herd[animal] = new_count
