@@ -56,7 +56,8 @@ class Wolfhound(Animal):
 
 
 class Player:
-    def __init__(self):
+    def __init__(self, name=None):
+        self.name = name
         self.herd = {"Rabbit": 0, "Sheep": 0, "Pig": 0, "Cow": 0, "Horse": 0, "Foxhound": 0, "Wolfhound": 0}
 
     def get_herd(self):
@@ -82,7 +83,7 @@ class ExchangeBoard:
 
 class GameManager:
     def __init__(self):
-        self.players = [Player(), Player()]
+        self.players = [Player("Player 1"), Player("Player 2")]
         self.current_player_index = 0
         self.main_herd = [Rabbit(60), Sheep(24), Pig(20), Cow(12), Horse(6), Foxhound(4), Wolfhound(2)]
         self.exchange_board = ExchangeBoard()
@@ -96,18 +97,7 @@ class GameManager:
     def start_up(self):
         while True:
             # initialize exchange board rules
-            ExchangeBoard.set_exchange_rate("Rabbit", "Sheep", 6)
-            ExchangeBoard.set_exchange_rate("Sheep", "Pig", 2)
-            ExchangeBoard.set_exchange_rate("Pig", "Cow", 3)
-            ExchangeBoard.set_exchange_rate("Cow", "Horse", 2)
-
-            ExchangeBoard.set_exchange_rate("Horse", "Cow", 1 / 2)
-            ExchangeBoard.set_exchange_rate("Cow", "Pig", 1 / 3)
-            ExchangeBoard.set_exchange_rate("Pig", "Sheep", 1 / 2)
-            ExchangeBoard.set_exchange_rate("Sheep", "Rabbit", 1 / 6)
-
-            ExchangeBoard.set_exchange_rate("Sheep", "Foxhound", 1)
-            ExchangeBoard.set_exchange_rate("Cow", "Wolfhound", 1)
+            self.exchange_board_rules_setup()
 
             if self.state == GameState.MAIN_MENU:
                 self.main_menu()
@@ -115,6 +105,28 @@ class GameManager:
                 self.play()
             elif self.state == GameState.GAME_OVER:
                 self.game_over()
+
+    def exchange_board_rules_setup(self):
+        ExchangeBoard.set_exchange_rate("Rabbit", "Sheep", 6)
+        ExchangeBoard.set_exchange_rate("Sheep", "Pig", 2)
+        ExchangeBoard.set_exchange_rate("Pig", "Cow", 3)
+        ExchangeBoard.set_exchange_rate("Cow", "Horse", 2)
+        ExchangeBoard.set_exchange_rate("Horse", "Cow", 1 / 2)
+        ExchangeBoard.set_exchange_rate("Cow", "Pig", 1 / 3)
+        ExchangeBoard.set_exchange_rate("Pig", "Sheep", 1 / 2)
+        ExchangeBoard.set_exchange_rate("Sheep", "Rabbit", 1 / 6)
+        ExchangeBoard.set_exchange_rate("Sheep", "Foxhound", 1)
+        ExchangeBoard.set_exchange_rate("Cow", "Wolfhound", 1)
+        # Additional direct exchanges
+        ExchangeBoard.set_exchange_rate("Horse", "Pigs", 6)  # Exchange 1 Horse for 6 Pigs
+        ExchangeBoard.set_exchange_rate("Horse", "Sheep", 12)  # Exchange 1 Horse for 12 Sheep
+        ExchangeBoard.set_exchange_rate("Horse", "Rabbits", 72)  # Exchange 1 Horse for 72 Rabbits
+
+        ExchangeBoard.set_exchange_rate("Cow", "Sheep", 6)  # Exchange 1 Cow for 6 Sheep
+        ExchangeBoard.set_exchange_rate("Cow", "Rabbits", 36)  # Exchange 1 Cow for 36 Rabbits
+
+        ExchangeBoard.set_exchange_rate("Pig", "Rabbits", 12)  # Exchange 1 Pig for 12 Rabbits
+
 
     def main_menu(self):
         print("Welcome to Super Farmer!")
@@ -172,8 +184,6 @@ class GameManager:
     def process_dice(self, current_player: Player, result_green: str, result_red: str):
         green_animal_count = current_player.get_herd().get(result_green, 0)
         red_animal_count = current_player.get_herd().get(result_red, 0)
-
-        test_inputs = [result_green, result_red, green_animal_count, red_animal_count]
 
         # Case fox is rolled
         if result_green == "Fox" or result_red == "Fox":
@@ -237,7 +247,7 @@ class GameManager:
 
         for _ in range(len(self.players)):
             current_player = self.players[self.current_player_index]
-            print(f"\n\n{current_player}'s Turn:")
+            print(f"\n\n{current_player.name}'s Turn:")
             roll = self.roll_dice()
             print(f"Roll: {roll}")
             self.process_dice(current_player, roll[0], roll[1])
