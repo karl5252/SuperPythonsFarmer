@@ -1,64 +1,29 @@
 import random
 from enum import Enum
-from typing import Tuple
+
+from game.animal import Animal, Rabbit, Sheep, Pig, Cow, Horse, Foxhound, Wolfhound
 
 
 class GameState(Enum):
+    """Enum class to represent the game state."""
     MAIN_MENU = 0
     IN_GAME = 1
     GAME_OVER = 2
 
 
-class Animal:
-    """base Animal class"""
-    herd_size: int = 0
-
-    def __init__(self, count):
-        self.herd_size = count
-        self.max_count = count
-
-    def subtract_from_herd(self, count):
-        """Subtract count from the herd. Return True if successful, False otherwise."""
-        if self.herd_size - count >= 0:
-            self.herd_size -= count
-            return True
-        else:
-            print(f"Attempted to subtract {count} from the herd, but not enough available.")
-            return False
-
-
-class Rabbit(Animal):
-    pass
-
-
-class Sheep(Animal):
-    pass
-
-
-class Pig(Animal):
-    pass
-
-
-class Cow(Animal):
-    pass
-
-
-class Horse(Animal):
-    pass
-
-
-class Foxhound(Animal):
-    pass
-
-
-class Wolfhound(Animal):
-    pass
-
-
 class Player:
+    """class to represent a player in the game."""
     def __init__(self, name=None):
         self.name = name
-        self.herd = {"Rabbit": 0, "Sheep": 0, "Pig": 0, "Cow": 0, "Horse": 0, "Foxhound": 0, "Wolfhound": 0}
+        self.herd = {
+            "Rabbit": 0,
+            "Sheep": 0,
+            "Pig": 0,
+            "Cow": 0,
+            "Horse": 0,
+            "Foxhound": 0,
+            "Wolfhound": 0
+        }
 
     def get_herd(self):
         return self.herd
@@ -90,8 +55,8 @@ class GameManager:
         self.state = GameState.MAIN_MENU
 
         # Display instructions when the game starts
-        print("initialised")
-        print(self.state)
+        # print("initialised")
+        # print(self.state)
         # self.start_up()
 
     def start_up(self):
@@ -126,7 +91,6 @@ class GameManager:
         ExchangeBoard.set_exchange_rate("Cow", "Rabbits", 36)  # Exchange 1 Cow for 36 Rabbits
 
         ExchangeBoard.set_exchange_rate("Pig", "Rabbits", 12)  # Exchange 1 Pig for 12 Rabbits
-
 
     def main_menu(self):
         print("Welcome to Super Farmer!")
