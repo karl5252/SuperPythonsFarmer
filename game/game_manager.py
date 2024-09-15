@@ -43,6 +43,18 @@ def roll_dice():
     return result_green, result_red
 
 
+def check_victory_condition(player: Player) -> bool:
+    """Check if the player has at least one of each required animal to win the game."""
+    required_animals = ["Rabbit", "Sheep", "Pig", "Cow", "Horse"]
+    player_herd = player.get_herd
+
+    for animal in required_animals:
+        if player_herd.get(animal, 0) < 1:
+            return False
+
+    return True
+
+
 class GameManager:
     """class to manage the game."""
 
@@ -208,8 +220,9 @@ class GameManager:
                     print("Please enter y or n")
 
             # Check if player is a victor and has one of each animal from the list: Rabbit, Sheep, Pig, Cow, Horse
-            if set(current_player.get_herd.keys()) == {"Rabbit", "Sheep", "Pig", "Cow", "Horse"}:
-                print(f"Congratulations, {current_player}! You are a victor!")
+
+            if check_victory_condition(current_player):
+                print(f"{current_player.name} is the victor!")
                 self.state = GameState.GAME_OVER
                 break
 
@@ -324,3 +337,4 @@ class GameManager:
             requestor_herd = self.players[request.requestor.index].get_herd
             if requestor_herd[request.from_animal] == 0:
                 request.status = "invalid"
+
