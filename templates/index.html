@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Farmer</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Super Farmer Game</h1>
+
+    <div>
+        <button id="roll-dice-btn">Roll Dice</button>
+        <p id="dice-result"></p>
+    </div>
+
+    <div>
+        <h2>Player 1's Herd</h2>
+        <button id="get-herd-btn">Get Player 1 Herd</button>
+        <p id="herd-result"></p>
+    </div>
+
+    <div>
+        <button id="check-victory-btn">Check Victory</button>
+        <p id="victory-result"></p>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // Roll Dice Button
+            $('#roll-dice-btn').click(function() {
+                $.post('/roll-dice', function(data) {
+                    $('#dice-result').text(`Green Dice: ${data.green}, Red Dice: ${data.red}`);
+                });
+            });
+
+            // Get Player 1 Herd Button
+            $('#get-herd-btn').click(function() {
+                $.get('/get-herd/0', function(data) {
+                    $('#herd-result').text(JSON.stringify(data.herd));
+                });
+            });
+
+            // Check Victory Button
+            $('#check-victory-btn').click(function() {
+                $.get('/check-victory/0', function(data) {
+                    $('#victory-result').text(`Victory: ${data.victory}`);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
