@@ -1,5 +1,6 @@
 class Animal:
     """base Animal class"""
+    herd_size: object
 
     def __init__(self, count: object) -> object:
         self.herd_size = count

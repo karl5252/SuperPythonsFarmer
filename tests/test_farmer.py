@@ -1,8 +1,9 @@
 import unittest
-
 from parameterized import parameterized as parametrized
 
-from main import Player, GameManager, ExchangeBoard
+from game.exchange_board import ExchangeBoard
+from game.game_manager import GameManager
+from game.player import Player
 
 
 class CommonSetupTeardown(unittest.TestCase):
@@ -27,9 +28,9 @@ class TestProcessDice(CommonSetupTeardown):
 
     def test_given_is_empty_player_herd_and_different_animals_rolled_herd_is_not_updated(self):
         """Test if herd is not updated when different animals are rolled."""
-        init__herd = self.test_player.get_herd()
+        init__herd = self.test_player.get_herd
         self.game_manager.process_dice(self.test_player, "Rabbit", "Sheep")
-        player_herd = self.test_player.get_herd()
+        player_herd = self.test_player.get_herd
         for animal_type in player_herd.values():
             self.assertEqual(0, animal_type, "Herd should not be updated when different animals are rolled.")
 
@@ -37,7 +38,7 @@ class TestProcessDice(CommonSetupTeardown):
         """Test if herd is updated by one when same animals are rolled."""
 
         self.game_manager.process_dice(self.test_player, "Rabbit", "Rabbit")
-        player_herd = self.test_player.get_herd()
+        player_herd = self.test_player.get_herd
         self.assertEqual(1, player_herd["Rabbit"], "Herd should be updated by one when same animals are rolled.")
 
     def test_given_is_two_pairs_in_player_herd_and_one_matching_animal_rolled_herd_is_updated_by_number_of_pairs(self):
@@ -47,7 +48,7 @@ class TestProcessDice(CommonSetupTeardown):
         # when
         self.game_manager.process_dice(self.test_player, "Rabbit", "Cow")
         # then
-        player_herd = self.test_player.get_herd()
+        player_herd = self.test_player.get_herd
         self.assertEqual(5, player_herd["Rabbit"], "Herd should be updated by number of pairs when matching animal is "
                                                    "rolled.")
 
@@ -58,7 +59,7 @@ class TestProcessDice(CommonSetupTeardown):
         # when
         self.game_manager.process_dice(self.test_player, "Rabbit", "Rabbit")
         # then
-        player_herd = self.test_player.get_herd()
+        player_herd = self.test_player.get_herd
         self.assertEqual(6, player_herd["Rabbit"], "Herd should be updated by number of pairs when same animals are ")
 
     def test_given_is_all_animals_but_no_foxhound_when_player_rolls_fox_then_looses_rabbits(self):
@@ -73,7 +74,7 @@ class TestProcessDice(CommonSetupTeardown):
         # when
         self.game_manager.process_dice(self.test_player, "Rabbit", "Fox")
         # then
-        player_herd = self.test_player.get_herd()
+        player_herd = self.test_player.get_herd
         self.assertEqual(0, player_herd["Rabbit"], "Player should loose rabbits when fox is rolled.")
 
     def test_given_is_all_animals_and_foxhound_when_player_rolls_fox_then_looses_foxhound_but_herd_is_intact(self):
@@ -89,7 +90,7 @@ class TestProcessDice(CommonSetupTeardown):
         # when
         self.game_manager.process_dice(self.test_player, "Rabbit", "Fox")
         # then
-        player_herd = self.test_player.get_herd()
+        player_herd = self.test_player.get_herd
         self.assertEqual(1, player_herd["Rabbit"], "Player should loose only foxhound when fox is rolled.")
         self.assertEqual(1, player_herd["Sheep"], "Player should loose only foxhound when fox is rolled.")
         self.assertEqual(1, player_herd["Pig"], "Player should loose only foxhound when fox is rolled.")
@@ -110,7 +111,7 @@ class TestProcessDice(CommonSetupTeardown):
         # when
         self.game_manager.process_dice(self.test_player, "Rabbit", "Wolf")
         # then
-        player_herd = self.test_player.get_herd()
+        player_herd = self.test_player.get_herd
         self.assertEqual(0, player_herd["Rabbit"], "Player should loose rabbits when wolf is rolled.")
         self.assertEqual(0, player_herd["Sheep"], "Player should loose rabbits when wolf is rolled.")
         self.assertEqual(0, player_herd["Pig"], "Player should loose rabbits when wolf is rolled.")
@@ -131,7 +132,7 @@ class TestProcessDice(CommonSetupTeardown):
         # when
         self.game_manager.process_dice(self.test_player, "Rabbit", "Wolf")
         # then
-        player_herd = self.test_player.get_herd()
+        player_herd = self.test_player.get_herd
         self.assertEqual(1, player_herd["Rabbit"])
         self.assertEqual(1, player_herd["Sheep"])
         self.assertEqual(1, player_herd["Pig"])
@@ -148,14 +149,14 @@ class TestProcessDice(CommonSetupTeardown):
         self.game_manager.main_herd[0].herd_size = 1  # set main herd Rabbit to one
 
         initial_main_herd_count = self.game_manager.main_herd[0].herd_size
-        init_player_herd = self.test_player.get_herd()
+        init_player_herd = self.test_player.get_herd
         # when
         self.game_manager.process_dice(self.test_player, "Rabbit", "Rabbit")  # due to remaining size should add
         # player just one rabbit
         # then
         final_main_herd_count = self.game_manager.main_herd[0].herd_size
 
-        player_herd = self.test_player.get_herd()
+        player_herd = self.test_player.get_herd
         self.assertEqual(5, player_herd["Rabbit"], "4 initial + one added")  # 4 initial + none added
 
         self.assertGreaterEqual(initial_main_herd_count,
@@ -182,7 +183,7 @@ class TestProcessDice(CommonSetupTeardown):
         # when
         self.game_manager.process_dice(self.test_player, "Pig", "Pig")
         # then
-        player_herd = self.test_player.get_herd()
+        player_herd = self.test_player.get_herd
         self.assertEqual(4, player_herd["Rabbit"], "4 initial + none added")  # 4 initial + none added
         self.assertEqual(1, player_herd["Pig"], "none initial + 1 added")  # none initial + 1 added
 
@@ -196,7 +197,7 @@ class TestProcessDice(CommonSetupTeardown):
         self.game_manager.process_dice(self.test_player, "Cow", "Rabbit")
 
         # then
-        player_herd = self.test_player.get_herd()
+        player_herd = self.test_player.get_herd
         self.assertEqual(4, player_herd["Rabbit"], "Player should have 2 rabbits after rolling a rabbit and a cow.")
         self.assertEqual(0, player_herd["Cow"], "Player should have no cows after rolling a rabbit and a cow.")
 
@@ -219,7 +220,7 @@ class TestExchangeRates(CommonSetupTeardown):
         # when
         self.game_manager.process_exchange(self.test_player, from_animal, to_animal)
         # then
-        player_herd = self.test_player.get_herd()
+        player_herd = self.test_player.get_herd
         self.assertEqual(0, player_herd[from_animal], "Player should loose animal when exchanging.")
         self.assertEqual(expected_result, player_herd[to_animal], "Player should gain animal when exchanging.")
 
@@ -240,7 +241,7 @@ class TestExchangeRates(CommonSetupTeardown):
         # when
         self.game_manager.process_exchange(self.test_player, from_animal, to_animal)
         # then
-        player_herd = self.test_player.get_herd()
+        player_herd = self.test_player.get_herd
         self.assertEqual(0, player_herd[from_animal], "Player should loose animal when exchanging.")
         self.assertEqual(1, player_herd[to_animal], "Player should gain animal when exchanging.")
 
