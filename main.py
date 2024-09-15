@@ -62,9 +62,9 @@ class Player:
     def get_herd(self):
         return self.herd
 
-    def update_herd(self, new_herd):
+    def update_herd(self, animal, new_count):
         """Update herd with new dict"""
-        self.herd.update(new_herd)
+        self.herd[animal] = new_count
 
 
 class ExchangeBoard:
@@ -170,58 +170,45 @@ class GameManager:
         return result_green, result_red
 
     def process_dice(self, current_player: Player, result_green: str, result_red: str):
-        """Process the dice roll and update the player's herd accordingly."""
         green_animal_count = current_player.get_herd().get(result_green, 0)
         red_animal_count = current_player.get_herd().get(result_red, 0)
 
+        test_inputs = [result_green, result_red, green_animal_count, red_animal_count]
+
         # Case fox is rolled
         if result_green == "Fox" or result_red == "Fox":
-            self.handle_fox(current_player)
+            if self.handle_fox(current_player):
+                return
 
         # Case wolf is rolled
         if result_green == "Wolf" or result_red == "Wolf":
-            self.handle_wolf(current_player)
-
-        # Case both dice match  and player has at least one animal of that type
-        if result_green == result_red and green_animal_count >= 1:
-            print("Same animal on both dice. Increasing herd.")
-            common_result = result_green
-            pairs = green_animal_count // 2
-            success, subtracted_count = self.subtract_main_herd(common_result, pairs)
-            if success:
-                lower_val = min(subtracted_count, pairs)
-                current_player.update_herd({common_result: current_player.get_herd()[common_result] + lower_val})
-                return
-
-        # Case player has a pair of animals of the same type
-        if green_animal_count >= 2:
-            print("Player has a pair of animals. Increasing herd.")
-            common_result = result_green
-            pairs = green_animal_count // 2
-            success, subtracted_count = self.subtract_main_herd(common_result, pairs)
-            if success:
-                lower_val = min(subtracted_count, pairs)
-                current_player.update_herd({common_result: current_player.get_herd()[common_result] + lower_val})
-                return
-
-        # Case player does not have the animal but rolls a pair
-        if green_animal_count == 0 and result_green == result_red:
-            print("Player does not have the animal but rolls a pair. Increasing herd.")
-            common_result = result_green
-            success, subtracted_count = self.subtract_main_herd(common_result, 1)
-            if success:
-                current_player.update_herd({common_result: current_player.get_herd().get(common_result, 0) + 1})
+            if self.handle_wolf(current_player):
                 return
 
         # Case both dice match
         if result_green == result_red:
-            print("Both dice match. Player receives the first animal.")
-            if self.main_herd[0].__class__.__name__ == result_green:
-                success, subtracted_count = self.subtract_main_herd(result_green, 1)
+            common_result = result_green
+            if green_animal_count == 0:
+                new_count = current_player.get_herd().get(common_result, 0) + 1
+                current_player.update_herd(common_result, new_count)
+            else:
+                pairs = green_animal_count // 2
+                success, subtracted_count = self.subtract_main_herd(common_result, pairs)
                 if success:
-                    current_herd = current_player.get_herd()
-                    current_player.update_herd({result_green: current_herd.get(result_green, 0) + subtracted_count})
-                    return
+                    lower_val = min(subtracted_count, pairs)
+                    new_count = current_player.get_herd().get(common_result, 0) + lower_val
+                    current_player.update_herd(common_result, new_count)
+        # Case dice do not match
+        else:
+            test = 0
+            # Add one of each animal to the player's herd if the player has at least one of the rolled animal
+            if current_player.get_herd().get(result_green, 0) > 0:
+                new_count_green = current_player.get_herd().get(result_green, 0) + 1
+                current_player.update_herd(result_green, new_count_green)
+
+            if current_player.get_herd().get(result_red, 0) > 0:
+                new_count_red = current_player.get_herd().get(result_red, 0) + 1
+                current_player.update_herd(result_red, new_count_red)
 
     def subtract_main_herd(self, animal_type: str, count: int) -> tuple[bool, int]:
         """Subtract count of animal_type from the main herd. Return True if successful, False otherwise.
@@ -321,36 +308,43 @@ class GameManager:
             print("Not enough animals to exchange!")
             return
 
-    def handle_fox(self, current_player: Player):
+    def handle_fox(self, current_player: Player) -> bool:
         if not any(current_player.get_herd().values()):
             print("Oh no it's the fox! Luckily there are no animals in player herd to update.")
-            return
+            return True
         print("Fox was rolled. What does the fox say? RINDINDINDIN!")
         if current_player.get_herd()["Foxhound"] > 0:
             print("'Woof Woof motherfucker!' Foxhound is in herd. No animals lost to fox. Removing foxhound.")
-            current_player.update_herd({"Foxhound": current_player.get_herd()["Foxhound"] - 1})
+            current_herd = current_player.get_herd()["Foxhound"]
+            current_player.update_herd("Foxhound", current_herd - 1)
+            return True
         else:
             print("Foxhound is not in herd. Loosing rabbits.")
             return_amount = current_player.get_herd()["Rabbit"]
-            current_player.update_herd({"Rabbit": 0})
+            current_player.update_herd("Rabbit", 0)
             self.main_herd[0].herd_size += return_amount
+            return False
 
-    def handle_wolf(self, current_player):
+    def handle_wolf(self, current_player) -> bool:
         if not any(current_player.get_herd().values()):
             print("Oh no it's the wolf! Luckily there are no animals in player herd to update.")
-            return
+            return True
         print("Wolf was rolled. 'AuuuUUUUuuuu... Better hide your children'")
         if current_player.get_herd()["Wolfhound"] > 0:
             print("'Woof Woof motherfucker!' Wolfhound is in herd. No animals lost to wolf. Removing wolfhound.")
-            current_player.update_herd({"Wolfhound": current_player.get_herd()["Wolfhound"] - 1})
+            current_herd = current_player.get_herd()["Wolfhound"]
+            current_player.update_herd("Wolfhound", current_herd - 1)
+            return True
         else:
             print("Wolfhound not in herd. You lost it all save your old jade...")  # jade means old horse
-            animals = current_player.get_herd()
+            animals = list(current_player.get_herd().keys())  # Create a copy of the keys
             for animal in animals:
-                if animal in ["Horse", "Foxhound"]: break
+                if animal in ["Horse", "Foxhound"]:
+                    continue
                 return_amount = current_player.get_herd()[animal]
-                current_player.update_herd({animal: 0})
+                current_player.update_herd(animal, 0)
                 self.main_herd[0].herd_size += return_amount
+            return False
 
 
 if __name__ == "__main__":

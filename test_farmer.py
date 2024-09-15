@@ -27,6 +27,7 @@ class TestProcessDice(CommonSetupTeardown):
 
     def test_given_is_empty_player_herd_and_different_animals_rolled_herd_is_not_updated(self):
         """Test if herd is not updated when different animals are rolled."""
+        init__herd = self.test_player.get_herd()
         self.game_manager.process_dice(self.test_player, "Rabbit", "Sheep")
         player_herd = self.test_player.get_herd()
         for animal_type in player_herd.values():
@@ -42,18 +43,18 @@ class TestProcessDice(CommonSetupTeardown):
     def test_given_is_two_pairs_in_player_herd_and_one_matching_animal_rolled_herd_is_updated_by_number_of_pairs(self):
         """Test if herd is updated by number of pairs when matching animal is rolled."""
         # given
-        self.test_player.update_herd({"Rabbit": 4})
+        self.test_player.update_herd("Rabbit", 4)
         # when
         self.game_manager.process_dice(self.test_player, "Rabbit", "Cow")
         # then
         player_herd = self.test_player.get_herd()
-        self.assertEqual(6, player_herd["Rabbit"], "Herd should be updated by number of pairs when matching animal is "
+        self.assertEqual(5, player_herd["Rabbit"], "Herd should be updated by number of pairs when matching animal is "
                                                    "rolled.")
 
     def test_given_is_two_pairs_in_player_herd_and_same_animals_rolled_herd_is_updated_by_number_of_pairs(self):
         """Test if herd is updated by number of pairs when same animals are rolled."""
         # given
-        self.test_player.update_herd({"Rabbit": 4})
+        self.test_player.update_herd("Rabbit", 4)
         # when
         self.game_manager.process_dice(self.test_player, "Rabbit", "Rabbit")
         # then
@@ -63,12 +64,12 @@ class TestProcessDice(CommonSetupTeardown):
     def test_given_is_all_animals_but_no_foxhound_when_player_rolls_fox_then_looses_rabbits(self):
         """Test if player looses rabbits when fox is rolled."""
         # given
-        self.test_player.update_herd({"Rabbit": 1})
-        self.test_player.update_herd({"Sheep": 1})
-        self.test_player.update_herd({"Pig": 1})
-        self.test_player.update_herd({"Cow": 1})
-        self.test_player.update_herd({"Horse": 1})
-        self.test_player.update_herd({"Wolfhound": 1})
+        self.test_player.update_herd("Rabbit", 1)
+        self.test_player.update_herd("Sheep", 1)
+        self.test_player.update_herd("Pig", 1)
+        self.test_player.update_herd("Cow", 1)
+        self.test_player.update_herd("Horse", 1)
+        self.test_player.update_herd("Wolfhound", 1)
         # when
         self.game_manager.process_dice(self.test_player, "Rabbit", "Fox")
         # then
@@ -78,13 +79,13 @@ class TestProcessDice(CommonSetupTeardown):
     def test_given_is_all_animals_and_foxhound_when_player_rolls_fox_then_looses_foxhound_but_herd_is_intact(self):
         """Test if player looses only foxhound when fox is rolled."""
         # given
-        self.test_player.update_herd({"Rabbit": 1})
-        self.test_player.update_herd({"Sheep": 1})
-        self.test_player.update_herd({"Pig": 1})
-        self.test_player.update_herd({"Cow": 1})
-        self.test_player.update_herd({"Horse": 1})
-        self.test_player.update_herd({"Foxhound": 1})
-        self.test_player.update_herd({"Wolfhound": 1})
+        self.test_player.update_herd("Rabbit", 1)
+        self.test_player.update_herd("Sheep", 1)
+        self.test_player.update_herd("Pig", 1)
+        self.test_player.update_herd("Cow", 1)
+        self.test_player.update_herd("Horse", 1)
+        self.test_player.update_herd("Foxhound", 1)
+        self.test_player.update_herd("Wolfhound", 1)
         # when
         self.game_manager.process_dice(self.test_player, "Rabbit", "Fox")
         # then
@@ -100,12 +101,12 @@ class TestProcessDice(CommonSetupTeardown):
     def test_given_is_all_animals_but_no_wolfhound_when_player_rolls_wolf_then_looses_all_but_horse_and_dogs(self):
         """Test if player looses all but horse and dogs when wolf is rolled."""
         # given
-        self.test_player.update_herd({"Rabbit": 1})
-        self.test_player.update_herd({"Sheep": 1})
-        self.test_player.update_herd({"Pig": 1})
-        self.test_player.update_herd({"Cow": 1})
-        self.test_player.update_herd({"Horse": 1})
-        self.test_player.update_herd({"Foxhound": 1})
+        self.test_player.update_herd("Rabbit", 1)
+        self.test_player.update_herd("Sheep", 1)
+        self.test_player.update_herd("Pig", 1)
+        self.test_player.update_herd("Cow", 1)
+        self.test_player.update_herd("Horse", 1)
+        self.test_player.update_herd("Wolfhound", 0)
         # when
         self.game_manager.process_dice(self.test_player, "Rabbit", "Wolf")
         # then
@@ -119,13 +120,13 @@ class TestProcessDice(CommonSetupTeardown):
     def test_given_is_all_animals_and_wolfhound_when_player_rolls_wolf_then_herd_is_intact_and_looses_wolfhound(self):
         """Test if player looses only wolfhound when wolf is rolled."""
         # given
-        self.test_player.update_herd({"Rabbit": 1})
-        self.test_player.update_herd({"Sheep": 1})
-        self.test_player.update_herd({"Pig": 1})
-        self.test_player.update_herd({"Cow": 1})
-        self.test_player.update_herd({"Horse": 1})
-        self.test_player.update_herd({"Wolfhound": 1})
-        self.test_player.update_herd({"Foxhound": 1})
+        self.test_player.update_herd("Rabbit", 1)
+        self.test_player.update_herd("Sheep", 1)
+        self.test_player.update_herd("Pig", 1)
+        self.test_player.update_herd("Cow", 1)
+        self.test_player.update_herd("Horse", 1)
+        self.test_player.update_herd("Foxhound", 1)
+        self.test_player.update_herd("Wolfhound", 1)
 
         # when
         self.game_manager.process_dice(self.test_player, "Rabbit", "Wolf")
@@ -142,7 +143,7 @@ class TestProcessDice(CommonSetupTeardown):
     def test_given_low_main_herd_when_player_rolls_matching_animals_then_max_count_not_dropped_below_zero(self):
         """Test if we don`t debt the bank when main herd is low and player rolls matching animals."""
         # given
-        self.test_player.update_herd({"Rabbit": 4})  # two pairs
+        self.test_player.update_herd("Rabbit", 4)  # two pairs
 
         self.game_manager.main_herd[0].herd_size = 1  # set main herd Rabbit to one
 
@@ -163,7 +164,7 @@ class TestProcessDice(CommonSetupTeardown):
     def test_given_player_has_to_return_animals_main_herd_is_not_updated_over_the_max_value(self):
         """Test if player returns animal then main herd is not updated over the max value."""
         # given
-        self.test_player.update_herd({"Rabbit": 4})
+        self.test_player.update_herd("Rabbit", 4)
         self.game_manager.main_herd[0].max_count = 1  # set main herd Rabbit to one
 
         # when
@@ -176,7 +177,7 @@ class TestProcessDice(CommonSetupTeardown):
         """Test if herd is updated when player has animals in herd and player rolls matching animals albeit other
         than already had."""
         # given
-        self.test_player.update_herd({"Rabbit": 4})
+        self.test_player.update_herd("Rabbit", 4)
 
         # when
         self.game_manager.process_dice(self.test_player, "Pig", "Pig")
@@ -184,6 +185,20 @@ class TestProcessDice(CommonSetupTeardown):
         player_herd = self.test_player.get_herd()
         self.assertEqual(4, player_herd["Rabbit"], "4 initial + none added")  # 4 initial + none added
         self.assertEqual(1, player_herd["Pig"], "none initial + 1 added")  # none initial + 1 added
+
+    def test_given_player_has_three_rabbits_and_rolls_cow_and_rabbit_then_herd_has_two_rabbits_and_no_cows(self):
+        """Test if herd is updated correctly when player has three rabbits and rolls a cow on one dice and a rabbit
+        on the other."""
+        # given
+        self.test_player.update_herd("Rabbit", 3)
+
+        # when
+        self.game_manager.process_dice(self.test_player, "Cow", "Rabbit")
+
+        # then
+        player_herd = self.test_player.get_herd()
+        self.assertEqual(4, player_herd["Rabbit"], "Player should have 2 rabbits after rolling a rabbit and a cow.")
+        self.assertEqual(0, player_herd["Cow"], "Player should have no cows after rolling a rabbit and a cow.")
 
 
 class TestExchangeRates(CommonSetupTeardown):
@@ -198,7 +213,7 @@ class TestExchangeRates(CommonSetupTeardown):
                                                                                   expected_result):
         """Test if player exchanges animal for animal then herd is updated."""
         # given
-        self.test_player.update_herd({from_animal: 1})
+        self.test_player.update_herd(from_animal, 1)
         ExchangeBoard.set_exchange_rate(from_animal, to_animal, ratio)
 
         # when
@@ -219,7 +234,7 @@ class TestExchangeRates(CommonSetupTeardown):
     def test_given_player_exchanges_animal_for_animal_then_herd_is_updated(self, from_animal, to_animal, ratio):
         """Test if player exchanges animal for animal then herd is updated."""
         # given
-        self.test_player.update_herd({from_animal: ratio})
+        self.test_player.update_herd(from_animal, ratio)
         ExchangeBoard.set_exchange_rate(from_animal, to_animal, ratio)
 
         # when
