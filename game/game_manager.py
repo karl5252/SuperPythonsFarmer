@@ -2,6 +2,7 @@
 import random
 from game.animal import Animal, Rabbit, Sheep, Pig, Cow, Foxhound, Wolfhound, Horse
 from game.exchange_board import ExchangeBoard
+from game.exchange_request import ExchangeRequest
 from game.game_state import GameState
 from game.player import Player
 
@@ -44,11 +45,13 @@ def roll_dice():
 
 class GameManager:
     """class to manage the game."""
+
     def __init__(self):
-        self.players = [Player("Player 1"), Player("Player 2")]
+        self.players = list() #[Player("Player 1"), Player("Player 2")]
         self.current_player_index = 0
         self.main_herd = [Rabbit(60), Sheep(24), Pig(20), Cow(12), Horse(6), Foxhound(4), Wolfhound(2)]
         self.exchange_board = ExchangeBoard()
+        self.exchange_requests = []  # List of active exchange requests
         self.state = GameState.MAIN_MENU
 
     def start_up(self):
@@ -283,3 +286,41 @@ class GameManager:
                 current_player.update_herd(animal, 0)
                 self.main_herd[0].herd_size += return_amount
             return False
+
+    def post_exchange_request(self, requestor, from_animal, to_animal):
+        """Post an exchange request."""
+        # Validate if the requestor has enough animals to make the request
+        requestor_herd = requestor.get_herd
+        if requestor_herd[from_animal] > 0:
+            new_request = ExchangeRequest(requestor, from_animal, to_animal)
+            self.exchange_requests.append(new_request)
+            return True
+        return False
+
+    def view_exchange_requests(self):
+        """View all pending exchange requests."""
+        return [request for request in self.exchange_requests if request.status == "pending"]
+
+    def accept_exchange_request(self, player_index, request):
+        """Accept an exchange request."""
+        if request.status == "pending":
+            requestor = self.players[request.requestor.index]
+            recipient = self.players[player_index]
+
+            # Check if requestor still has enough animals to fulfill the request
+            if requestor.get_herd[request.from_animal] > 0:
+                requestor.update_herd(request.from_animal, requestor.get_herd[request.from_animal] - 1)
+                recipient.update_herd(request.to_animal, recipient.get_herd[request.to_animal] + 1)
+                request.status = "accepted"
+                return True
+            else:
+                request.status = "pending"
+                return False
+        return False
+
+    def invalidate_requests(self):
+        """Invalidate exchange requests if the requestor no longer has the necessary animals."""
+        for request in self.exchange_requests:
+            requestor_herd = self.players[request.requestor.index].get_herd
+            if requestor_herd[request.from_animal] == 0:
+                request.status = "invalid"

@@ -5,7 +5,7 @@ from game.player import Player
 class TestPlayer(unittest.TestCase):
 
     def setUp(self):
-        self.player = Player("Test Player")
+        self.player = Player("Test Player", 0)
 
     def test_get_herd(self):
         self.assertEqual(self.player.get_herd, {

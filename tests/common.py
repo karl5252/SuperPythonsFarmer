@@ -16,7 +16,7 @@ class CommonSetupTeardown(unittest.TestCase):
         cls.game_manager = None
 
     def setUp(self):
-        self.test_player = Player()
+        self.test_player = Player(index=0)
 
     def tearDown(self):
         self.test_player = None

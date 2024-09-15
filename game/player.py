@@ -2,8 +2,9 @@
 class Player:
     """class to represent a player in the game."""
 
-    def __init__(self, name: object = None) -> object:
+    def __init__(self, name: object = None, index = 0) -> object:
         self.name = name
+        self.index = index
         self.herd = {
             "Rabbit": 0,
             "Sheep": 0,
