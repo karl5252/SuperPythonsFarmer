@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, jsonify, request, render_template, redirect, url_for
 from game.game_manager import GameManager, check_victory_condition, roll_dice
 
 app = Flask(__name__)
@@ -12,15 +12,27 @@ def get_game_manager():
 
 
 @app.route('/')
-def index():
-    """Render the main game page."""
-    return render_template('index.html')
-
-
-@app.route('/main-menu', methods=['GET'])
 def main_menu():
-    """Return the main menu options."""
-    return jsonify(game_manager.main_menu())
+    """Render the main game page."""
+    return render_template('main_menu.html')
+
+
+@app.route('/start-game', methods=['POST'])
+def start_game():
+    # Extract player names from the form data
+    player_names = request.form.getlist('player_names')
+
+    if len(player_names) == len(set(player_names)) and all(player_names):  # Ensure no empty or duplicate names
+        return redirect(url_for('game', players=player_names))
+    else:
+        return "Invalid player names, please try again."
+
+
+@app.route('/game')
+def game():
+    # Extract players from URL arguments
+    players = request.args.getlist('players')
+    return render_template('game.html', players=players)
 
 
 @app.route('/process-menu', methods=['POST'])
