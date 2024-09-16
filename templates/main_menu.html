@@ -196,6 +196,30 @@
 
             });
         });
+			// Start Game Button
+            $('#start-game-btn').click(function() {
+                // Collect player names from the modal inputs
+                const playerNames = [];
+                for (let i = 1; i <= selectedPlayers; i++) {
+                    const playerName = $(`#player${i}-name`).val().trim();
+                    playerNames.push(playerName);
+                }
+
+            // Send the player names via AJAX
+            $.ajax({
+             url: '/start-game',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ players: playerNames }),  // Send the player names as JSON
+                success: function(data) {
+                    // Redirect or load the game page on success
+                    window.location.href = '/game';  // This could be modified based on your backend logic
+                },
+                error: function(err) {
+                    alert('Error starting the game. Please try again.');
+                }
+			});
+		});
     </script>
 
 </body>
