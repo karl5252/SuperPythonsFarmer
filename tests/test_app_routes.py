@@ -21,7 +21,7 @@ class TestApp(unittest.TestCase):
 
     def test_roll_dice(self):
         response = self.client.post('/roll-dice')
-        self.assertEqual(200, response.status_code, "Expected success" )
+        self.assertEqual(200, response.status_code, "Expected success")
         data = response.get_json()
         self.assertIn('green', data)
         self.assertIn('red', data)
@@ -36,7 +36,7 @@ class TestApp(unittest.TestCase):
 
     def test_check_victory(self):
         response = self.client.get('/check-victory/0')
-        self.assertEqual(200, response.status_code, "Expected success" )
+        self.assertEqual(200, response.status_code, "Expected success")
         data = response.get_json()
         self.assertIn('victory', data)
 
