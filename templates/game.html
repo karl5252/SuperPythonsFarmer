@@ -92,6 +92,20 @@
         .control-button:hover {
             background-color: #45a049;
         }
+        /* Forfeit Button Styling */
+        #forfeit-btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 5px;
+            background-color: #f44336;  /* Distinct red color */
+            color: white;
+            border: 1px solid #d32f2f;  /* Thin border */
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        #forfeit-btn:hover {
+            background-color: #e53935;
+        }
 		/* Modal for Exchange Request */
         #exchange-modal {
             display: none;
@@ -131,15 +145,34 @@
 <body>
 
     <!-- Top Player Color Bar -->
-    <div id="player-bar">Player 1's Turn</div>
+    <div id="player-bar">
+        Player 1's Turn
+        <button id="forfeit-btn" class="control-button" style="margin-left: 20px;">FORFEIT</button>
+
+    </div>
 
     <!-- Main Herd Display (Top-Center) -->
     <div id="main-herd">
-        <div class="animal-tile">🐇 60</div>
-        <div class="animal-tile">🐑 24</div>
-        <div class="animal-tile">🐖 20</div>
-        <div class="animal-tile">🐄 12</div>
-        <div class="animal-tile">🐎 6</div>
+        <div class="animal-tile">
+            <img src="{{ url_for('static', filename='img/bun_snake.png') }}" alt="Rabbit">
+            <br>60
+        </div>
+        <div class="animal-tile">
+            <img src="{{ url_for('static', filename='img/sheep_snake.png') }}" alt="Sheep">
+            <br>24
+        </div>
+        <div class="animal-tile">
+            <img src="{{ url_for('static', filename='img/pig_snake.png') }}" alt="Pig">
+            <br>20
+        </div>
+        <div class="animal-tile">
+            <img src="{{ url_for('static', filename='img/cow_snake.png') }}" alt="Cow">
+            <br>12
+        </div>
+        <div class="animal-tile">
+            <img src="{{ url_for('static', filename='img/horse_snake.png') }}" alt="Horse">
+            <br>6
+        </div>
     </div>
 
     <!-- Dice Display (Center) -->
@@ -215,16 +248,47 @@
 
     <!-- Player's Herd (Bottom-Center, Mirroring Main Herd) -->
     <div id="player-herd">
-        <div class="animal-tile">🐇 10 Rabbits</div>
-        <div class="animal-tile">🐑 5 Sheep</div>
-        <div class="animal-tile">🐖 2 Pigs</div>
-        <div class="animal-tile">🐄 1 Cow</div>
-        <div class="animal-tile">🐎 0 Horses</div>
+        <div class="animal-tile">
+            <img src="{{ url_for('static', filename='img/bun_snake.png') }}" alt="Rabbit">
+            <br>10 Rabbits
+        </div>
+        <div class="animal-tile">
+            <img src="{{ url_for('static', filename='img/sheep_snake.png') }}" alt="Sheep">
+            <br>5 Sheep
+        </div>
+        <div class="animal-tile">
+            <img src="{{ url_for('static', filename='img/pig_snake.png') }}" alt="Pig">
+            <br>2 Pigs
+        </div>
+        <div class="animal-tile">
+            <img src="{{ url_for('static', filename='img/cow_snake.png') }}" alt="Cow">
+            <br>1 Cow
+        </div>
+        <div class="animal-tile">
+            <img src="{{ url_for('static', filename='img/horse_snake.png') }}" alt="Horse">
+            <br>0 Horses
+        </div>
+        <div class="animal-tile">
+            <img src="{{ url_for('static', filename='img/sdoggo_snake.png') }}" alt="Foxhound">
+            <br>0 Foxhounds
+        </div>
+        <div class="animal-tile">
+            <img src="{{ url_for('static', filename='img/bdoggo_snake.png') }}" alt="Wolfhound">
+            <br>0 Wolfhounds
+        </div>
     </div>
 
 </body>
-	<!-- JavaScript to Handle Modal -->
 <script>
+    <!-- JavaScript to Handle Forfeit Button -->
+    document.getElementById('forfeit-btn').addEventListener('click', function() {
+        if (confirm('Are you sure you want to forfeit the game?')) {
+            // Add your logic here to handle forfeiting the game
+            window.location.href = '/';  // Redirect to the main menu or any other appropriate action
+        }
+    });
+    	<!-- JavaScript to Handle Modal -->
+
     // Open the modal
     document.getElementById('make-exchange-btn').addEventListener('click', function() {
         document.getElementById('exchange-modal').style.display = 'block';
