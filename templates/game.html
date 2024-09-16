@@ -38,6 +38,27 @@
             background-color: #e0e0e0;
             border-radius: 8px;
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+            position: relative;
+            text-align: center;
+        }
+        .image-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+        .animal-tile img {
+            max-width: 80px;
+            display: block;
+            margin: 0 auto;
+        }
+        .animal-count {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            font-weight: bold;
+            color: white;  /* White seems good to consider YELLOW */
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);  /* for better readability */
         }
         /* Dice Display */
         #dice-display {
@@ -154,24 +175,34 @@
     <!-- Main Herd Display (Top-Center) -->
     <div id="main-herd">
         <div class="animal-tile">
-            <img src="{{ url_for('static', filename='img/bun_snake.png') }}" alt="Rabbit">
-            <br>60
+                <div class="image-wrapper">
+                    <img src="{{ url_for('static', filename='img/bun_snake.png') }}" alt="Rabbit">
+                    <div class="animal-count">60</div>
+                </div>
         </div>
         <div class="animal-tile">
-            <img src="{{ url_for('static', filename='img/sheep_snake.png') }}" alt="Sheep">
-            <br>24
+                <div class="image-wrapper">
+                    <img src="{{ url_for('static', filename='img/sheep_snake.png') }}" alt="Sheep">
+                    <div class="animal-count">24</div>
+                </div>
         </div>
         <div class="animal-tile">
-            <img src="{{ url_for('static', filename='img/pig_snake.png') }}" alt="Pig">
-            <br>20
+                <div class="image-wrapper">
+                    <img src="{{ url_for('static', filename='img/pig_snake.png') }}" alt="Pig">
+                    <div class="animal-count">20</div>
+                </div>
         </div>
         <div class="animal-tile">
-            <img src="{{ url_for('static', filename='img/cow_snake.png') }}" alt="Cow">
-            <br>12
+                <div class="image-wrapper">
+                    <img src="{{ url_for('static', filename='img/cow_snake.png') }}" alt="Cow">
+                    <div class="animal-count">12</div>
+                </div>
         </div>
         <div class="animal-tile">
-            <img src="{{ url_for('static', filename='img/horse_snake.png') }}" alt="Horse">
-            <br>6
+                <div class="image-wrapper">
+                    <img src="{{ url_for('static', filename='img/horse_snake.png') }}" alt="Horse">
+                    <div class="animal-count">6</div>
+                </div>
         </div>
     </div>
 
@@ -249,32 +280,46 @@
     <!-- Player's Herd (Bottom-Center, Mirroring Main Herd) -->
     <div id="player-herd">
         <div class="animal-tile">
-            <img src="{{ url_for('static', filename='img/bun_snake.png') }}" alt="Rabbit">
-            <br>10 Rabbits
+            <div class="image-wrapper">
+                <img src="{{ url_for('static', filename='img/bun_snake.png') }}" alt="Rabbit">
+                <div class="animal-count">10</div>
+            </div>
         </div>
         <div class="animal-tile">
-            <img src="{{ url_for('static', filename='img/sheep_snake.png') }}" alt="Sheep">
-            <br>5 Sheep
+            <div class="image-wrapper">
+                <img src="{{ url_for('static', filename='img/sheep_snake.png') }}" alt="Sheep">
+                <div class="animal-count">5</div>
+            </div>
         </div>
         <div class="animal-tile">
-            <img src="{{ url_for('static', filename='img/pig_snake.png') }}" alt="Pig">
-            <br>2 Pigs
+            <div class="image-wrapper">
+                <img src="{{ url_for('static', filename='img/pig_snake.png') }}" alt="Pig">
+                <div class="animal-count">2</div>
+            </div>
         </div>
         <div class="animal-tile">
-            <img src="{{ url_for('static', filename='img/cow_snake.png') }}" alt="Cow">
-            <br>1 Cow
+            <div class="image-wrapper">
+                <img src="{{ url_for('static', filename='img/cow_snake.png') }}" alt="Cow">
+                <div class="animal-count">1</div>
+            </div>
         </div>
         <div class="animal-tile">
-            <img src="{{ url_for('static', filename='img/horse_snake.png') }}" alt="Horse">
-            <br>0 Horses
+            <div class="image-wrapper">
+                <img src="{{ url_for('static', filename='img/horse_snake.png') }}" alt="Horse">
+                <div class="animal-count">0</div>
+            </div>
         </div>
         <div class="animal-tile">
-            <img src="{{ url_for('static', filename='img/sdoggo_snake.png') }}" alt="Foxhound">
-            <br>0 Foxhounds
+            <div class="image-wrapper">
+                <img src="{{ url_for('static', filename='img/sdoggo_snake.png') }}" alt="Foxhound">
+                <div class="animal-count">0</div>
+            </div>
         </div>
         <div class="animal-tile">
-            <img src="{{ url_for('static', filename='img/bdoggo_snake.png') }}" alt="Wolfhound">
-            <br>0 Wolfhounds
+            <div class="image-wrapper">
+                <img src="{{ url_for('static', filename='img/bdoggo_snake.png') }}" alt="Wolfhound">
+                <div class="animal-count">0</div>
+            </div>
         </div>
     </div>
 
