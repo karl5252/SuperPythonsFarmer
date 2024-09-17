@@ -6,7 +6,7 @@
     <title>Super Python Farmer - Game</title>
 
     <style>
-        body {
+ body {
             font-family: Arial, sans-serif;
             background-color: #f0f0f0;
             text-align: center;
@@ -40,6 +40,9 @@
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
             position: relative;
             text-align: center;
+        }
+        .animal-tile:hover {
+            background-color: #d0d0d0;
         }
         .image-wrapper {
             position: relative;
@@ -176,7 +179,7 @@
     <div id="main-herd">
         <div class="animal-tile">
                 <div class="image-wrapper">
-                    <img src="{{ url_for('static', filename='img/bun_snake.png') }}" alt="Rabbit">
+                    <img src="{{ url_for('static', filename='img/rabbit_snake.png') }}" alt="Rabbit">
                     <div class="animal-count">60</div>
                 </div>
         </div>
@@ -239,8 +242,8 @@
 
     <!-- Control Buttons (Bottom-Center, Above Player's Herd) -->
     <div id="controls">
-	    <button id="make-exchange-btn" class="control-button">Make Exchange</button>
-        <button class="control-button">Roll Dice (End Turn)</button>
+        <button id="roll-dice-btn" class="control-button">Roll Dice</button>
+        <button id="make-exchange-btn" class="control-button">Make Exchange</button>
     </div>
 	<!-- Modal Structure -->
 <div id="exchange-modal" class="modal" style="display:none;">
@@ -281,7 +284,7 @@
     <div id="player-herd">
         <div class="animal-tile">
             <div class="image-wrapper">
-                <img src="{{ url_for('static', filename='img/bun_snake.png') }}" alt="Rabbit">
+                <img src="{{ url_for('static', filename='img/rabbit_snake.png') }}" alt="Rabbit">
                 <div class="animal-count">10</div>
             </div>
         </div>
@@ -311,13 +314,13 @@
         </div>
         <div class="animal-tile">
             <div class="image-wrapper">
-                <img src="{{ url_for('static', filename='img/sdoggo_snake.png') }}" alt="Foxhound">
+                <img src="{{ url_for('static', filename='img/foxhound_snake.png') }}" alt="Foxhound">
                 <div class="animal-count">0</div>
             </div>
         </div>
         <div class="animal-tile">
             <div class="image-wrapper">
-                <img src="{{ url_for('static', filename='img/bdoggo_snake.png') }}" alt="Wolfhound">
+                <img src="{{ url_for('static', filename='img/wolfhound_snake.png') }}" alt="Wolfhound">
                 <div class="animal-count">0</div>
             </div>
         </div>
@@ -325,6 +328,8 @@
 
 </body>
 <script>
+    let currentPlayer = 0; // Index of the current player
+
     <!-- JavaScript to Handle Forfeit Button -->
     document.getElementById('forfeit-btn').addEventListener('click', function() {
         if (confirm('Are you sure you want to forfeit the game?')) {
@@ -332,6 +337,10 @@
             window.location.href = '/';  // Redirect to the main menu or any other appropriate action
         }
     });
+    <!-- JavaScript to Handle Dice Roll -->
+        function updatePlayerTurn(players) {
+        document.getElementById('player-bar').textContent = `${players[currentPlayer]}'s Turn`;
+    }
     	<!-- JavaScript to Handle Modal -->
 
     // Open the modal
@@ -355,5 +364,55 @@
         // Close the modal after submission
         document.getElementById('exchange-modal').style.display = 'none';
     });
+
+    function updateHerd(herd, containerId) {
+        let herdContainer = document.getElementById(containerId);
+        herdContainer.innerHTML = '';  // Clear the previous herd
+
+        // Loop through the herd and add animal tiles dynamically
+        for (const animal in herd) {
+            let animalTile = `
+                <div class="animal-tile">
+                    <img src="/static/img/${animal.toLowerCase()}_snake.png" alt="${animal}">
+                    <span class="animal-count">${herd[animal]}</span>
+                </div>
+            `;
+            herdContainer.innerHTML += animalTile;
+        }
+    }
+
+    // Example function to simulate rolling dice (real values would come from the server)
+    function rollDice() {
+        fetch('/roll-dice', {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('dice-display').textContent = `🎲 ${data.green}, 🎲 ${data.red}`;
+        });
+    }
+
+    // When the Roll Dice button is clicked
+    document.getElementById('roll-dice-btn').addEventListener('click', function() {
+        rollDice();
+        // After rolling dice, proceed to next player's turn
+        currentPlayer = (currentPlayer + 1) % players.length;
+        updatePlayerTurn(players);
+    });
+
+    // Simulated player data (replace this with data from Flask)
+    const players = ['Player 1', 'Player 2'];
+    const initialHerd = {
+        "Rabbit": 60,
+        "Sheep": 24,
+        "Pig": 20,
+        "Cow": 12,
+        "Horse": 6
+    };
+
+    // Update the page with initial data
+    updatePlayerTurn(players);
+    updateHerd(initialHerd, 'main-herd');
+    updateHerd({"Rabbit": 0, "Sheep": 0, "Pig": 0, "Cow": 0, "Horse": 0}, 'player-herd');
 </script>
 </html>

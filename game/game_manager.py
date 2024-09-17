@@ -330,3 +330,9 @@ class GameManager:
             if requestor_herd[request.from_animal] == 0:
                 request.status = "invalid"
 
+    def get_player_names(self):
+        return [player.name for player in self.players]
+
+    def get_main_herd(self):
+        return self.main_herd
+

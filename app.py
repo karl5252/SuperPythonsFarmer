@@ -32,7 +32,10 @@ def start_game():
 def game():
     # Extract players from URL arguments
     players = request.args.getlist('players')
-    return render_template('game.html', players=players)
+    return render_template('game.html',
+                           players=game_manager.get_player_names(),
+                           herd=game_manager.get_main_herd()
+                           )
 
 
 @app.route('/process-menu', methods=['POST'])
