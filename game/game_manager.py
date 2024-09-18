@@ -330,3 +330,8 @@ class GameManager:
             if requestor_herd[request.from_animal] == 0:
                 request.status = "invalid"
 
+    def get_main_herd(self):
+        """Return the main herd as a dictionary with animal names and their counts."""
+        herd_dict = {animal.__class__.__name__: animal.herd_size for animal in self.main_herd}
+        return herd_dict
+

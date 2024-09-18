@@ -123,10 +123,14 @@
             border: 1px solid #d32f2f;  /* Thin border */
             border-radius: 8px;
             cursor: pointer;
+            position: absolute; /* Position it absolutely on the page */
+            bottom: 20px; /* 20px from the bottom */
+            right: 20px;  /* 20px from the right */
         }
         #forfeit-btn:hover {
             background-color: #e53935;
         }
+
 		/* Modal for Exchange Request */
         #exchange-modal {
             display: none;
@@ -168,9 +172,9 @@
     <!-- Top Player Color Bar -->
     <div id="player-bar">
         Player 1's Turn
-        <button id="forfeit-btn" class="control-button" style="margin-left: 20px;">FORFEIT</button>
-
     </div>
+    <button id="forfeit-btn" class="control-button" style="margin-left: 20px;">FORFEIT</button>
+
 
     <!-- Main Herd Display (Top-Center) -->
     <div id="main-herd">
@@ -325,14 +329,18 @@
 
 </body>
 <script>
-    <!-- JavaScript to Handle Forfeit Button -->
+    // Global variable for current player
+    let currentPlayer = 0;  // Default to Player 1 or dynamically update
+    const players = {{ players|tojson }};
+
+    // JavaScript to Handle Forfeit Button
     document.getElementById('forfeit-btn').addEventListener('click', function() {
         if (confirm('Are you sure you want to forfeit the game?')) {
-            // Add your logic here to handle forfeiting the game
             window.location.href = '/';  // Redirect to the main menu or any other appropriate action
         }
     });
-    	<!-- JavaScript to Handle Modal -->
+
+    // JavaScript to Handle Modal
 
     // Open the modal
     document.getElementById('make-exchange-btn').addEventListener('click', function() {
@@ -349,36 +357,62 @@
         const giveAnimal = document.getElementById('give-animal').value;
         const receiveAnimal = document.getElementById('receive-animal').value;
 
-        // Add AJAX call or game logic here to process the exchange
-        console.log(`Exchange request: Give ${giveAnimal}, Receive ${receiveAnimal}`);
+    // Add AJAX call or game logic here to process the exchange
+    console.log(`Exchange request: Give ${giveAnimal}, Receive ${receiveAnimal}`);
 
-        // Close the modal after submission
-        document.getElementById('exchange-modal').style.display = 'none';
+    // Close the modal after submission
+    document.getElementById('exchange-modal').style.display = 'none';
     });
 
-    // Handle to roll the dice and update the main herd, player herd and dice display
+    // Triggering the dice roll
     document.getElementById('roll-dice-btn').addEventListener('click', function() {
-        console.log('Rolling the dice...');
-    // Send AJAX POST request to /roll-dice
         fetch('/roll-dice', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
-            }
+            },
+            body: JSON.stringify({
+                player_index: currentPlayer  // Send the current player's index
+            })
         })
         .then(response => response.json())
         .then(data => {
             // Update the dice display
             document.getElementById('dice-display').textContent = `🎲 ${data.green}, 🎲 ${data.red}`;
 
-            // Update the main herd and player herd here
-            // Example: Update the player turn
+            // Update the player's herd
+            updateHerd(data.player_herd, 'player-herd');
+
+            // Update the main herd
+            updateHerd(data.main_herd, 'main-herd');
+
+            // Update the current player indicator using player names
             const playerColors = ['#4CAF50', '#2196F3', '#FFC107', '#FF5722'];
-            const currentPlayerIndex = (game_manager.current_player_index + 1) % game_manager.players.length;
-            document.getElementById('player-bar').textContent = `Player ${currentPlayerIndex + 1}'s Turn`;
-            document.getElementById('player-bar').style.backgroundColor = playerColors[currentPlayerIndex];
+            currentPlayer = data.current_player_index;  // Update current player index
+            document.getElementById('player-bar').textContent = `${players[currentPlayer]}'s Turn`;  // Display player name
+            document.getElementById('player-bar').style.backgroundColor = playerColors[currentPlayer];
         })
         .catch(error => console.error('Error:', error));
     });
+
+
+    // Function to update the herd display
+    function updateHerd(herd, herdId) {
+        const herdDisplay = document.getElementById(herdId);
+        const animalTiles = herdDisplay.getElementsByClassName('animal-tile');
+
+        for (let i = 0; i < animalTiles.length; i++) {
+           const animalImg = animalTiles[i].getElementsByTagName('img')[0];
+          const animalType = animalImg.alt;  // Get animal type from alt attribute
+          const animalCount = animalTiles[i].getElementsByClassName('animal-count')[0];
+
+          if (herd[animalType]) {
+              animalCount.textContent = herd[animalType];  // Update based on animal type
+            } else {
+              animalCount.textContent = '0';  // If animal is not found in herd, default to 0
+            }
+        }
+    }
+
 </script>
 </html>

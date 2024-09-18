@@ -17,6 +17,7 @@ class Player:
 
     @property
     def get_herd(self):
+        """Return the herd dict"""
         return self.herd
 
     def update_herd(self, animal: str, new_count: int):
