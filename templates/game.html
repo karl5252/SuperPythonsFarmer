@@ -240,7 +240,7 @@
     <!-- Control Buttons (Bottom-Center, Above Player's Herd) -->
     <div id="controls">
 	    <button id="make-exchange-btn" class="control-button">Make Exchange</button>
-        <button class="control-button">Roll Dice (End Turn)</button>
+        <button id="roll-dice-btn" class="control-button">Roll Dice (End Turn)</button>
     </div>
 	<!-- Modal Structure -->
 <div id="exchange-modal" class="modal" style="display:none;">
@@ -349,11 +349,36 @@
         const giveAnimal = document.getElementById('give-animal').value;
         const receiveAnimal = document.getElementById('receive-animal').value;
 
-        // Add your AJAX call or game logic here to process the exchange
+        // Add AJAX call or game logic here to process the exchange
         console.log(`Exchange request: Give ${giveAnimal}, Receive ${receiveAnimal}`);
 
         // Close the modal after submission
         document.getElementById('exchange-modal').style.display = 'none';
+    });
+
+    // Handle to roll the dice and update the main herd, player herd and dice display
+    document.getElementById('roll-dice-btn').addEventListener('click', function() {
+        console.log('Rolling the dice...');
+    // Send AJAX POST request to /roll-dice
+        fetch('/roll-dice', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Update the dice display
+            document.getElementById('dice-display').textContent = `🎲 ${data.green}, 🎲 ${data.red}`;
+
+            // Update the main herd and player herd here
+            // Example: Update the player turn
+            const playerColors = ['#4CAF50', '#2196F3', '#FFC107', '#FF5722'];
+            const currentPlayerIndex = (game_manager.current_player_index + 1) % game_manager.players.length;
+            document.getElementById('player-bar').textContent = `Player ${currentPlayerIndex + 1}'s Turn`;
+            document.getElementById('player-bar').style.backgroundColor = playerColors[currentPlayerIndex];
+        })
+        .catch(error => console.error('Error:', error));
     });
 </script>
 </html>

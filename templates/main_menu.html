@@ -162,27 +162,40 @@
         }
 
         // Handle form submission (validation and passing data to the backend)
-        document.getElementById('player-form').addEventListener('submit', function(event) {
-            event.preventDefault();  // Prevent default form submission
+document.getElementById('player-form').addEventListener('submit', function(event) {
+    event.preventDefault();  // Prevent default form submission
 
-            const playerNames = [];
-            let nameSet = new Set();
+    const playerNames = [];
+    let nameSet = new Set();
 
-            for (let i = 1; i <= selectedPlayers; i++) {
-                const playerName = document.getElementById(`player${i}-name`).value.trim();
-                if (!playerName || nameSet.has(playerName)) {
-                    alert("Player names cannot be empty or identical!");
-                    return;
-                }
-                playerNames.push(playerName);
-                nameSet.add(playerName);
-            }
+    for (let i = 1; i <= selectedPlayers; i++) {
+        const playerName = document.getElementById(`player${i}-name`).value.trim();
+        if (!playerName || nameSet.has(playerName)) {
+            alert("Player names cannot be empty or identical!");
+            return;
+        }
+        playerNames.push(playerName);
+        nameSet.add(playerName);
+    }
 
-            // Send the names to the server using AJAX or redirect to the game page
-            console.log("Player names:", playerNames);
-            // Here, you can use fetch or window.location to pass player names to Flask
-        });
-
+    // Send the names to the server using AJAX
+    fetch('/start-game', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ player_names: playerNames })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = '/game';
+        } else {
+            alert('Invalid player names, please try again.');
+        }
+    })
+    .catch(error => console.error('Error:', error));
+});
             // Instructions Button
             $('#instructions-btn').click(function() {
                 $.ajax({
