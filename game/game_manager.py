@@ -59,6 +59,7 @@ class GameManager:
     """class to manage the game."""
 
     def __init__(self):
+        self.herd_modifiable = False
         self.players = []
         self.current_player_index = 0
         self.main_herd = [Rabbit(60), Sheep(24), Pig(20), Cow(12), Horse(6), Foxhound(4), Wolfhound(2)]
@@ -177,6 +178,19 @@ class GameManager:
 
         return False, 0
 
+    def add_to_main_herd(self, animal_type: str, count: int) -> None:
+        """Add count of animal_type to the main herd considering Animal.max_count cannot be exceeded."""
+        for animal in self.main_herd:
+            if isinstance(animal, Animal) and animal.__class__.__name__ == animal_type:
+                if animal.herd_size + count <= animal.max_count:
+                    animal.herd_size += count
+                    return
+                else:
+                    # If the count exceeds the max count, add the difference instead
+                    test = animal.max_count - animal.herd_size
+                    animal.herd_size = animal.max_count
+                    return
+
     def play(self):
         self.state = GameState.IN_GAME
 
@@ -255,41 +269,46 @@ class GameManager:
             return
 
     def handle_fox(self, current_player: Player) -> bool:
+        """Handle the fox event. Rabbits are lost unless the player has a Foxhound."""
         if not any(current_player.get_herd.values()):
-            print("Oh no it's the fox! Luckily there are no animals in player herd to update.")
+            print("Oh no it's the fox! Luckily there are no animals in the player's herd to update.")
             return True
+
         print("Fox was rolled. What does the fox say? RINDINDINDIN!")
+
         if current_player.get_herd["Foxhound"] > 0:
-            print("'Woof Woof motherfucker!' Foxhound is in herd. No animals lost to fox. Removing foxhound.")
+            print("'Woof Woof!' Foxhound is in herd. No animals lost to the fox. Removing 1 Foxhound.")
             current_herd = current_player.get_herd["Foxhound"]
             current_player.update_herd("Foxhound", current_herd - 1)
             return True
         else:
-            print("Foxhound is not in herd. Loosing rabbits.")
-            return_amount = current_player.get_herd["Rabbit"]
+            print("Foxhound is not in herd. Losing all rabbits.")
+            lost_rabbits = current_player.get_herd["Rabbit"]
             current_player.update_herd("Rabbit", 0)
-            self.main_herd[0].herd_size += return_amount
+
+            # Add lost rabbits back to the main herd, but ensure we don't exceed the max count
+            self.add_to_main_herd("Rabbit", lost_rabbits)
             return False
 
     def handle_wolf(self, current_player) -> bool:
+        """Handle the wolf event."""
         if not any(current_player.get_herd.values()):
             print("Oh no it's the wolf! Luckily there are no animals in player herd to update.")
             return True
+
         print("Wolf was rolled. 'AuuuUUUUuuuu... Better hide your children'")
+
         if current_player.get_herd["Wolfhound"] > 0:
-            print("'Woof Woof motherfucker!' Wolfhound is in herd. No animals lost to wolf. Removing wolfhound.")
-            current_herd = current_player.get_herd["Wolfhound"]
-            current_player.update_herd("Wolfhound", current_herd - 1)
+            print("'Woof Woof!' Wolfhound is in herd. No animals lost to wolf. Removing 1 Wolfhound.")
+            current_player.update_herd("Wolfhound", current_player.get_herd["Wolfhound"] - 1)
             return True
         else:
-            print("Wolfhound not in herd. You lost it all save your old jade...")  # jade means old horse
-            animals = list(current_player.get_herd.keys())  # Create a copy of the keys
-            for animal in animals:
-                if animal in ["Horse", "Foxhound"]:
-                    continue
-                return_amount = current_player.get_herd[animal]
-                current_player.update_herd(animal, 0)
-                self.main_herd[0].herd_size += return_amount
+            print("Wolfhound not in herd. You lost all animals except Horse and Foxhound.")
+            for animal in current_player.get_herd:
+                if animal not in ["Horse", "Foxhound"]:
+                    lost_animals = current_player.get_herd[animal]
+                    current_player.update_herd(animal, 0)
+                    self.add_to_main_herd(animal, lost_animals)  # Return lost animals to the main herd
             return False
 
     def post_exchange_request(self, requestor, from_animal, to_animal):
@@ -334,4 +353,3 @@ class GameManager:
         """Return the main herd as a dictionary with animal names and their counts."""
         herd_dict = {animal.__class__.__name__: animal.herd_size for animal in self.main_herd}
         return herd_dict
-

@@ -39,7 +39,8 @@ class TestProcessDice(CommonSetupTeardown):
         self.game_manager.process_dice(self.test_player, "Rabbit", "Rabbit")
         # then
         player_herd = self.test_player.get_herd
-        self.assertEqual(6, player_herd["Rabbit"], "Herd should be updated by number of pairs when same animals are ")
+        self.assertEqual(6, player_herd["Rabbit"], "Herd should be updated by"
+                                                   " number of pairs when same animals are rolled")
 
     def test_given_is_all_animals_but_no_foxhound_when_player_rolls_fox_then_looses_rabbits(self):
         """Test if player looses rabbits when fox is rolled."""
@@ -180,7 +181,33 @@ class TestProcessDice(CommonSetupTeardown):
         self.assertEqual(4, player_herd["Rabbit"], "Player should have 2 rabbits after rolling a rabbit and a cow.")
         self.assertEqual(0, player_herd["Cow"], "Player should have no cows after rolling a rabbit and a cow.")
 
+    def test_given_main_herd_max_size_rabbit_is_60_when_player_rolls_wolf_then_herd_is_not_exceeding_max_size(self):
+        """Test if main herd is not exceeding max size when player rolls wolf. There is a bug in the code that permits
+        this. Hence, we need to identify the root cause and fix it."""
+        # check main herd size
+        self.game_manager.main_herd[0].herd_size = 60
+        self.assertEqual(60, self.game_manager.main_herd[0].herd_size, "Main herd initial size should be 60")
+        # given player has 1 rabbit
+        self.test_player.update_herd("Rabbit", 1)
+        # when player rolls wolf
+        self.game_manager.process_dice(self.test_player, "Rabbit", "Wolf")
 
+        # then main herd should be 60
+        self.assertEqual(60, self.game_manager.main_herd[0].herd_size, "Main herd should be 60")
+
+    def test_given_main_herd_max_size_rabbit_is_60_when_player_rolls_fox_then_herd_is_not_exceeding_max_size(self):
+        """Test if main herd is not exceeding max size when player rolls wolf. There is a bug in the code that permits
+        this. Hence, we need to identify the root cause and fix it."""
+        # check main herd size
+        self.game_manager.main_herd[0].herd_size = 60
+        self.assertEqual(60, self.game_manager.main_herd[0].herd_size, "Main herd initial size should be 60")
+        # given player has 1 rabbit
+        self.test_player.update_herd("Rabbit", 1)
+        # when player rolls wolf
+        self.game_manager.process_dice(self.test_player, "Rabbit", "Fox")
+
+        # then main herd should be 60
+        self.assertEqual(60, self.game_manager.main_herd[0].herd_size, "Main herd rabbit count should be 60")
 
 
 if __name__ == '__main__':

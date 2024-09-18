@@ -13,30 +13,58 @@ class Animal:
             return True
         return False
 
+    def add_to_herd(self, count):
+        """Add count to the herd but ensure herd_size does not exceed max_count."""
+        available_space = self.max_count - self.herd_size
+        to_add = min(count, available_space)
+        self.herd_size += to_add
+        return to_add  # Return the number of animals actually added
+
 
 class Rabbit(Animal):
-    pass
+    """Rabbit class"""
+    def __init__(self, count=60):
+        super().__init__(count)
+        self.max_count = 60
 
 
 class Sheep(Animal):
-    pass
+    """Sheep class"""
+    def __init__(self, count=24):
+        super().__init__(count)
+        self.max_count = 24
 
 
 class Pig(Animal):
-    pass
+    """Pig class"""
+    def __init__(self, count=20):
+        super().__init__(count)
+        self.max_count = 20
 
 
 class Cow(Animal):
-    pass
+    """Cow class"""
+    def __init__(self, count=12):
+        super().__init__(count)
+        self.max_count = 12
 
 
 class Horse(Animal):
-    pass
+    """Horse class"""
+    def __init__(self, count=6):
+        super().__init__(count)
+        self.max_count = 6
 
 
 class Foxhound(Animal):
-    pass
+    """Foxhound class"""
+    def __init__(self, count=4):
+        super().__init__(count)
+        self.max_count = 4
 
 
 class Wolfhound(Animal):
-    pass
+    """Wolfhound class"""
+    def __init__(self, count=2):
+        super().__init__(count)
+        self.max_count = 2

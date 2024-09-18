@@ -50,7 +50,6 @@ def game():
 
     # Get player names from session to pass to the game page
     players = session.get('player_names', [])
-    #players = [player.name for player in game_manager.players]
 
     return render_template('game.html',
                            players=players,  # Player names to display in the game
