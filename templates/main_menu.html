@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Python Farmer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('static/img/background.png');  /* static/background.png */
+            background-repeat: repeat;
+            background-size: auto;
+            background-color: #f0f0f0;  /* Fallback background color */
+            text-align: center;
+        }
+        #title-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 50px;
+        }
+        #title {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 0 20px;
+            color: white;  /* Set a contrasting text color */
+            text-shadow: 2px 2px 4px #000000;  /* Add shadow to make it pop */
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.5);  /* Optional: Transparent background for readability */
+            border-radius: 8px;  /* Optional: Rounded corners on the background */
+        }
+        .image-placeholder {
+            width: 150px;
+            height: 150px;
+            background-color: #cccccc;
+            display: inline-block;
+        }
+        #menu {
+            margin-top: 30px;
+        }
+        .menu-button {
+            display: block;
+            width: 400px;    /* Set a fixed width to align them nicely */
+            margin: 20px auto;  /* Center the buttons horizontally */
+            padding: 20px 40px;
+            font-size: 24px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+        .menu-button.easy { background-color: #90EE90; } /* Green for Easy (2-player) */
+        .menu-button.medium { background-color: #FFD700; } /* Yellow for Medium (3-player) */
+        .menu-button.hard { background-color: #FF6347; } /* Red for Hard (4-player) */
+        .menu-button.instructions { background-color: #1E90FF; } /* Blue for Instructions */
+        .menu-button:hover { opacity: 0.9; }
+        .menu-button:hover {
+            background-color: #45a049;
+        }
+        #instructions {
+            text-align: left;
+            margin: 20px auto;
+            padding: 10px;
+            width: 60%;
+            background-color: white;
+            border: 1px solid #ddd;
+            display: none;  /* Initially hidden */
+        }
+             /* Modal for player names */
+        #player-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+        }
+        #modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        #player-modal input {
+            padding: 10px;
+            font-size: 18px;
+            margin: 10px;
+            width: 80%;
+        }
+        #player-modal button {
+            padding: 10px 20px;
+            font-size: 18px;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="title-container">
+        <div class="image-placeholder" id="image-left"></div>
+        <div id="title">Super Python Farmer</div>
+        <div class="image-placeholder" id="image-right"></div>
+    </div>
+
+    <div id="menu">
+        <!-- Player Selection Buttons -->
+        <button class="menu-button easy" id="2-player-btn" onclick="openPlayerModal(2)">2 - Player Game (Easy)</button>
+        <button class="menu-button medium" id="3-player-btn" onclick="openPlayerModal(3)">3 - Player Game (Medium)</button>
+        <button class="menu-button hard" id="4-player-btn" onclick="openPlayerModal(4)">4 - Player Game (Hard)</button>
+
+        <!-- Instructions Button -->
+        <button class="menu-button instructions" id="instructions-btn">Instructions</button>
+        <p id="menu-result"></p>
+    </div>
+    <!-- Modal for Player Names, hidden by default -->
+
+    <div id="player-modal">
+        <h3>Enter Player Names</h3>
+        <form id="player-form">
+            <div id="player-name-fields"></div>
+            <button id="start-game-btn" type="submit">Start Game</button>
+            <button type="button" onclick="closePlayerModal()">Cancel</button>
+        </form>
+    </div>
+    <div id="modal-overlay"></div>
+
+    <div id="instructions"></div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        let selectedPlayers = 2;
+
+        // Open the modal and dynamically create the input fields for player names
+        function openPlayerModal(playerCount) {
+            selectedPlayers = playerCount;
+            const playerNameFields = document.getElementById('player-name-fields');
+            playerNameFields.innerHTML = ''; // Clear existing fields
+
+            // Create input fields based on the number of players
+            for (let i = 1; i <= playerCount; i++) {
+                playerNameFields.innerHTML += `<input type="text" id="player${i}-name" placeholder="Player ${i} Name" required>`;
+            }
+
+            document.getElementById('player-modal').style.display = 'block';
+            document.getElementById('modal-overlay').style.display = 'block';
+        }
+
+        // Close the modal
+        function closePlayerModal() {
+            document.getElementById('player-modal').style.display = 'none';
+            document.getElementById('modal-overlay').style.display = 'none';
+        }
+
+        // Handle form submission (validation and passing data to the backend)
+document.getElementById('player-form').addEventListener('submit', function(event) {
+    event.preventDefault();  // Prevent default form submission
+
+    const playerNames = [];
+    let nameSet = new Set();
+
+    for (let i = 1; i <= selectedPlayers; i++) {
+        const playerName = document.getElementById(`player${i}-name`).value.trim();
+        if (!playerName || nameSet.has(playerName)) {
+            alert("Player names cannot be empty or identical!");
+            return;
+        }
+        playerNames.push(playerName);
+        nameSet.add(playerName);
+    }
+
+    // Send the names to the server using AJAX
+    fetch('/start-game', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ player_names: playerNames })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = '/game';
+        } else {
+            alert('Invalid player names, please try again.');
+        }
+    })
+    .catch(error => console.error('Error:', error));
+});
+            // Instructions Button
+            $('#instructions-btn').click(function() {
+                $.ajax({
+                    url: '/process-menu',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ choice: '1' }),  // '1' for instructions
+                    success: function(data) {
+                        $('#instructions').html(data.message.replace(/\n/g, '<br>')).show();  // Show instructions
+                    }
+
+            });
+        });
+			// Start Game Button
+            $('#start-game-btn').click(function() {
+                // Collect player names from the modal inputs
+                const playerNames = [];
+                for (let i = 1; i <= selectedPlayers; i++) {
+                    const playerName = $(`#player${i}-name`).val().trim();
+                    playerNames.push(playerName);
+                }
+
+            // Send the player names via AJAX
+            $.ajax({
+             url: '/start-game',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ players: playerNames }),  // Send the player names as JSON
+                success: function(data) {
+                    // Redirect or load the game page on success
+                    window.location.href = '/game';  // This could be modified based on your backend logic
+                },
+                error: function(err) {
+                    alert('Error starting the game. Please try again.');
+                }
+			});
+		});
+    </script>
+
+</body>
+</html>
