@@ -20,7 +20,8 @@ class TestApp(unittest.TestCase):
         app.get_game_manager = lambda: self.test_game_manager
 
     def test_roll_dice(self):
-        response = self.client.post('/roll-dice')
+        # Assuming player_index 0 for the test
+        response = self.client.post('/roll-dice', json={'player_index': 0})
         self.assertEqual(200, response.status_code, "Expected success")
         data = response.get_json()
         self.assertIn('green', data)
