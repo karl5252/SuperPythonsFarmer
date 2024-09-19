@@ -225,7 +225,7 @@
 
     <!-- Dice Display (Center) -->
     <div id="dice-display">
-        🎲 Rabbit, 🎲 Pig
+        🎲 Roll, 🎲 Dice
     </div>
 
     <!-- Exchange Rates (Left Column) -->
@@ -259,40 +259,74 @@
 	    <button id="make-exchange-btn" class="control-button">Make Exchange</button>
         <button id="roll-dice-btn" class="control-button">Roll Dice (End Turn)</button>
     </div>
-	<!-- Modal Structure -->
-<div id="exchange-modal" class="modal" style="display:none;">
-    <div class="modal-content">
-        <h3>Make an Exchange</h3>
 
-        <!-- Dropdown 1: Select the animal to give -->
-        <label for="give-animal">Animal to give:</label>
-        <select id="give-animal">
-            <option value="Rabbit">Rabbit</option>
-            <option value="Sheep">Sheep</option>
-            <option value="Pig">Pig</option>
-            <option value="Cow">Cow</option>
-            <option value="Horse">Horse</option>
-        </select>
+	<!-- Exchange Modal Structure -->
+    <div id="exchange-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <h3>Make an Exchange</h3>
+            <label for="exchange-with">Exchange with:</label>
+                <select id="exchange-with">
+                    <option value="main-herd">Main Herd</option>
+                    <option value="players">Players</option>
+                </select>
+            <br>
 
-        <br><br>
+            <!-- Dropdown 1: Select the animal to give -->
+            <label for="give-animal">Animal to give:</label>
+            <select id="give-animal">
+                <option value="Rabbit">Rabbit</option>
+                <option value="Sheep">Sheep</option>
+                <option value="Pig">Pig</option>
+                <option value="Cow">Cow</option>
+                <option value="Horse">Horse</option>
+            </select>
 
-        <!-- Dropdown 2: Select the animal to receive -->
-        <label for="receive-animal">Animal to receive:</label>
-        <select id="receive-animal">
-            <option value="Rabbit">Rabbit</option>
-            <option value="Sheep">Sheep</option>
-            <option value="Pig">Pig</option>
-            <option value="Cow">Cow</option>
-            <option value="Horse">Horse</option>
-        </select>
+            <br><br>
 
-        <br><br>
+            <!-- Input for the number of animals to give -->
+            <label for="give-count">Amount to give:</label>
+            <input type="number" id="give-count" min="1" value="1">
 
-        <!-- Modal Buttons -->
-        <button id="submit-exchange">Submit Exchange</button>
-        <button id="cancel-exchange">Cancel</button>
+            <br><br>
+
+            <!-- Dropdown 2: Select the animal to receive -->
+            <label for="receive-animal">Animal to receive:</label>
+            <select id="receive-animal">
+                <option value="Rabbit">Rabbit</option>
+                <option value="Sheep">Sheep</option>
+                <option value="Pig">Pig</option>
+                <option value="Cow">Cow</option>
+                <option value="Horse">Horse</option>
+            </select>
+
+            <br><br>
+
+            <!-- Input for the number of animals to receive -->
+            <label for="receive-count">Amount to receive:</label>
+            <input type="number" id="receive-count" min="1" value="1">
+
+            <br><br>
+
+            <!-- Modal Buttons -->
+            <button id="submit-exchange">Submit Exchange</button>
+            <button id="cancel-exchange">Cancel</button>
+        </div>
     </div>
-</div>
+
+
+    <!-- Modal with event -->
+    <!-- to display WOLF and FOX events -->
+    <div id="event-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <h3>Event</h3>
+            <!-- image of the event -->
+            <img id="event-image" src="" alt="Event Image">
+            <p id="event-description"></p>
+            <button id="close-event">Close</button>
+        </div>
+    </div>
+
+
 
     <!-- Player's Herd (Bottom-Center, Mirroring Main Herd) -->
     <div id="player-herd">
@@ -350,11 +384,18 @@
     // JavaScript to Handle Forfeit Button
     document.getElementById('forfeit-btn').addEventListener('click', function() {
         if (confirm('Are you sure you want to forfeit the game?')) {
+        // Add AJAX call or game logic here to handle forfeit
+        fetch('/forfeit', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
             window.location.href = '/';  // Redirect to the main menu or any other appropriate action
         }
     });
 
-    // JavaScript to Handle Modal
+    // JavaScript to handle Exchange Modal
 
     // Open the modal
     document.getElementById('make-exchange-btn').addEventListener('click', function() {

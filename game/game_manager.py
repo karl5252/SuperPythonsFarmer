@@ -219,7 +219,7 @@ class GameManager:
     def process_exchange(self, player1: Player, player2: Player, animal1: str, animal2: str, ratio: float) -> bool:
         """
         Process an exchange between two players (including Main Herd as player).
-        Handles both normal and inverse exchanges.
+        Handles both normal and inverse exchanges based on the ratio.
         """
         # Get the count of animal1 in player1's herd
         count1 = player1.get_herd().get(animal1, 0)
@@ -231,18 +231,28 @@ class GameManager:
                 return player1.transfer_to(player2, animal1, int(ratio)) and player2.transfer_to(player1, animal2,
                                                                                                  count2)
         else:  # Inverse exchange (e.g., 1 Horse = 2 Cows)
-            count2 = int(count1 * (1 / ratio))  # Number of animal2 player1 should receive
+            count2 = int(1 / ratio)  # Number of animal2 player1 should receive
             if count1 >= 1 and player2.get_herd().get(animal2, 0) >= count2:
                 return player1.transfer_to(player2, animal1, 1) and player2.transfer_to(player1, animal2, count2)
 
         return False  # If conditions are not met, return False
 
-    def post_exchange_request(self, requestor, from_animal, to_animal):
-        """Post an exchange request."""
-        # Validate if the requestor has enough animals to make the request
+    def post_exchange_request(self, requestor: Player, from_animal: str, to_animal: str, count1: int,
+                              count2: int) -> bool:
+        """
+        Post an exchange request from one player to another or with the main herd.
+        count1 is the amount offered, and count2 is the expected amount in return.
+        The exchange ratio is calculated as count1 / count2 and stored in the request.
+        """
         requestor_herd = requestor.get_herd()
-        if requestor_herd[from_animal] > 0:
-            new_request = ExchangeRequest(requestor, from_animal, to_animal)
+
+        # Ensure requestor has enough animals to meet the count1 for exchange
+        if requestor_herd.get(from_animal, 0) >= count1:
+            # Calculate the ratio based on amounts offered and expected
+            ratio = count1 / count2
+
+            # Create a new exchange request with the calculated ratio and offered amounts
+            new_request = ExchangeRequest(requestor, from_animal, to_animal, count1, count2, ratio)
             self.exchange_requests.append(new_request)
             return True
         return False
@@ -251,27 +261,50 @@ class GameManager:
         """View all pending exchange requests."""
         return [request for request in self.exchange_requests if request.status == "pending"]
 
-    def accept_exchange_request(self, player_index, request):
-        """Accept an exchange request."""
+    def accept_exchange_request(self, player_index: int, request: ExchangeRequest) -> bool:
+        """
+        Accept an exchange request using the stored count1, count2, and ratio for exchange.
+        """
         if request.status == "pending":
             requestor = self.players[request.requestor.index]
             recipient = self.players[player_index]
 
-            # Check if requestor still has enough animals to fulfill the request
-            if requestor.get_herd()[request.from_animal] > 0:
-                requestor.update_herd(request.from_animal, requestor.get_herd()[request.from_animal] - 1)
-                recipient.update_herd(request.to_animal, recipient.get_herd()[request.to_animal] + 1)
+            # Check if the requestor still has enough animals to fulfill the exchange
+            if requestor.get_herd().get(request.from_animal, 0) >= request.amount_wanted:
+                # Execute the exchange using the stored amounts and ratio in the request
                 request.status = "accepted"
-                return True
+                return self.process_exchange(requestor, recipient, request.from_animal, request.to_animal,
+                                             request.ratio)
             else:
-                request.status = "pending"
+                request.status = "invalid"
                 return False
         return False
 
     def invalidate_requests(self):
-        """Invalidate exchange requests if the requestor no longer has the necessary animals."""
+        """
+        Invalidate exchange requests if the requestor no longer has the required animals.
+        This method ensures that old requests don’t clutter the pending requests list.
+        """
         for request in self.exchange_requests:
             requestor_herd = self.players[request.requestor.index].get_herd()
-            if requestor_herd[request.from_animal] == 0:
+            if requestor_herd.get(request.from_animal, 0) == 0:
                 request.status = "invalid"
+
+    def reset_game(self):
+        """Reset the game state."""
+        self.herd_modifiable = False
+        self.players = []
+        self.current_player_index = 0
+        self.main_herd = Player("Main Herd", 99)
+        self.main_herd.update_herd("Rabbit", 60)
+        self.main_herd.update_herd("Sheep", 24)
+        self.main_herd.update_herd("Pig", 20)
+        self.main_herd.update_herd("Cow", 12)
+        self.main_herd.update_herd("Horse", 6)
+        self.main_herd.update_herd("Foxhound", 4)
+        self.main_herd.update_herd("Wolfhound", 2)
+        self.exchange_requests = []
+        self.state = GameState.MAIN_MENU
+        return "Game reset. Players can now join."
+
 

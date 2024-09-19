@@ -86,7 +86,7 @@ def roll_dice_for_current_player():
         'red': result_red,
         'current_player_index': player_index,
         'main_herd': game_manager.main_herd.get_herd(),  # This is now a dictionary
-        'player_herd': current_player.get_herd()    # This is now a dictionary
+        'player_herd': current_player.get_herd()  # This is now a dictionary
     }
 
     return jsonify(response_data)
@@ -113,18 +113,32 @@ def exchange_animals():
 
     player1_index = data['player1_index']
     player2_index = data['player2_index']
-    animal1 = data['animal1']  # The animal player1 is offering
-    animal2 = data['animal2']  # The animal player2 is offering
-    count1 = data['count1']  # The number of animal1 player1 is offering
-    count2 = data['count2']  # The number of animal2 player2 is offering
+    request_index = data.get('request_index')  # Assuming we pass the index or ID of the exchange request
 
+    # Retrieve players involved
     player1 = game_manager.players[player1_index]
     player2 = game_manager.players[player2_index]
 
-    if game_manager.process_exchange(player1, player2, animal1, animal2, count1, count2):
-        return jsonify(success=True, message="Exchange completed!")
+    # Retrieve the exchange request based on its index or unique ID
+    if 0 <= request_index < len(game_manager.exchange_requests):
+        exchange_request = game_manager.exchange_requests[request_index]
+
+        # Process the exchange using the stored count1 and count2 in the request
+        if game_manager.process_exchange(player1, player2, exchange_request.from_animal, exchange_request.to_animal, exchange_request.count1, exchange_request.count2):
+            exchange_request.status = 'completed'  # Mark the request as completed
+            return jsonify(success=True, message="Exchange completed!")
+        else:
+            return jsonify(success=False, message="Exchange failed. Check animal counts.")
     else:
-        return jsonify(success=False, message="Exchange failed. Check animal counts.")
+        return jsonify(success=False, message="Invalid exchange request.")
+
+
+
+@app.route('/reset-game', methods=['POST'])
+def reset_game():
+    """Reset the game state."""
+    game_manager.reset_game()
+    return jsonify(success=True, message="Game reset successfully.")
 
 
 if __name__ == '__main__':
