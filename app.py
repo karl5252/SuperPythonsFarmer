@@ -107,5 +107,25 @@ def check_player_victory(player_index):
     return jsonify(victory=has_won)
 
 
+@app.route('/exchange', methods=['POST'])
+def exchange_animals():
+    data = request.get_json()
+
+    player1_index = data['player1_index']
+    player2_index = data['player2_index']
+    animal1 = data['animal1']  # The animal player1 is offering
+    animal2 = data['animal2']  # The animal player2 is offering
+    count1 = data['count1']  # The number of animal1 player1 is offering
+    count2 = data['count2']  # The number of animal2 player2 is offering
+
+    player1 = game_manager.players[player1_index]
+    player2 = game_manager.players[player2_index]
+
+    if game_manager.process_exchange(player1, player2, animal1, animal2, count1, count2):
+        return jsonify(success=True, message="Exchange completed!")
+    else:
+        return jsonify(success=False, message="Exchange failed. Check animal counts.")
+
+
 if __name__ == '__main__':
     app.run(debug=True)

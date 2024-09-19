@@ -120,6 +120,7 @@ class GameManager:
         """Process the dice roll results and update the player's herd accordingly."""
         green_animal_count = current_player.get_herd.get(result_green, 0)
         red_animal_count = current_player.get_herd.get(result_red, 0)
+        main_herd_dict = self.get_main_herd()  # Store the main herd as a dictionary
 
         # Case fox is rolled
         if result_green == "Fox" or result_red == "Fox":
@@ -135,61 +136,43 @@ class GameManager:
         if result_green == result_red:
             common_result = result_green
             if green_animal_count == 0:
-                new_count = current_player.get_herd.get(common_result, 0) + 1
-                current_player.update_herd(common_result, new_count)
+                self.transfer_animals(main_herd_dict, current_player.get_herd, common_result, 1)
             else:
                 pairs = green_animal_count // 2
-                success, subtracted_count = self.subtract_main_herd(common_result, pairs)
-                if success:
-                    lower_val = min(subtracted_count, pairs)
-                    new_count = current_player.get_herd.get(common_result, 0) + lower_val
-                    current_player.update_herd(common_result, new_count)
+                self.transfer_animals(main_herd_dict, current_player.get_herd, common_result, pairs)
         # Case dice do not match
         else:
-            test = 0
             # Add one of each animal to the player's herd if the player has at least one of the rolled animal
-            if current_player.get_herd.get(result_green, 0) > 0:
-                new_count_green = current_player.get_herd.get(result_green, 0) + 1
-                current_player.update_herd(result_green, new_count_green)
+            if green_animal_count > 0:
+                self.transfer_animals(main_herd_dict, current_player.get_herd, result_green, 1)
 
-            if current_player.get_herd.get(result_red, 0) > 0:
-                new_count_red = current_player.get_herd.get(result_red, 0) + 1
-                current_player.update_herd(result_red, new_count_red)
+            if red_animal_count > 0:
+                self.transfer_animals(main_herd_dict, current_player.get_herd, result_red, 1)
 
-    def subtract_main_herd(self, animal_type: str, count: int) -> tuple[bool, int]:
-        """Subtract count of animal_type from the main herd. Return True if successful, False otherwise.
-        :arg animal_type: Type of animal to subtract from the main herd
-        :arg count: Number of animals to subtract from the main herd
-        :return: True if successful, False otherwise"""
-        for animal in self.main_herd:
-            if isinstance(animal, Animal) and animal.__class__.__name__ == animal_type:
-                if animal.herd_size - count >= 0:
-                    # If there are enough animals in the main herd, subtract the count
-                    animal.herd_size -= count
-                    return True, count
-                else:
-                    # check if there are enough animals in the main herd
-                    leftover = count - animal.herd_size
+    def transfer_animals(self, from_herd, to_herd, animal_type, count):
+        """
+        Transfer animals from one herd to another.
 
-                    print(
-                        f"Attempted to subtract {count} {animal_type}(s) from the main herd, but not enough "
-                        f"available. Returning {leftover}")
-                    return True, leftover
+        :param from_herd: The herd to take animals from (dictionary)
+        :param to_herd: The herd to give animals to (dictionary)
+        :param animal_type: Type of animal to transfer
+        :param count: Number of animals to transfer
+        :return: True if successful, False otherwise
+        """
+        if from_herd.get(animal_type, 0) >= count:  # Ensure enough animals in the source herd
+            from_herd[animal_type] -= count
+            to_herd[animal_type] = to_herd.get(animal_type, 0) + count
 
-        return False, 0
+            # Update the main herd list based on the dictionary
+            for animal in self.main_herd:
+                if animal.__class__.__name__ == animal_type:
+                    animal.herd_size = from_herd[animal_type]
+                    break
 
-    def add_to_main_herd(self, animal_type: str, count: int) -> None:
-        """Add count of animal_type to the main herd considering Animal.max_count cannot be exceeded."""
-        for animal in self.main_herd:
-            if isinstance(animal, Animal) and animal.__class__.__name__ == animal_type:
-                if animal.herd_size + count <= animal.max_count:
-                    animal.herd_size += count
-                    return
-                else:
-                    # If the count exceeds the max count, add the difference instead
-                    test = animal.max_count - animal.herd_size
-                    animal.herd_size = animal.max_count
-                    return
+            return True
+        else:
+            print(f"Not enough {animal_type} to transfer.")
+            return False
 
     def play(self):
         self.state = GameState.IN_GAME
@@ -247,7 +230,8 @@ class GameManager:
                 player_herd[animal_to_exchange_for] += 1
 
                 # Update main herd in both exchange directions
-                self.subtract_main_herd(animal_for_exchange, exchange_rate)
+                # self.subtract_main_herd(animal_for_exchange, exchange_rate)
+                self.transfer_animals(self.get_main_herd(), player_herd, animal_for_exchange, exchange_rate)
                 self.main_herd[0].herd_size += 1
 
                 return
@@ -260,7 +244,8 @@ class GameManager:
                 player_herd[animal_for_exchange] -= 1
 
                 # Update main herd in both exchange directions
-                self.subtract_main_herd(animal_to_exchange_for, inverse_exchange_rate)
+                #self.subtract_main_herd(animal_to_exchange_for, inverse_exchange_rate)
+                self.transfer_animals(self.get_main_herd(), player_herd, animal_to_exchange_for, inverse_exchange_rate)
                 self.main_herd[0].herd_size += inverse_exchange_rate
 
                 return
@@ -270,6 +255,7 @@ class GameManager:
 
     def handle_fox(self, current_player: Player) -> bool:
         """Handle the fox event. Rabbits are lost unless the player has a Foxhound."""
+        main_herd_dict = self.get_main_herd()  # Store the main herd as a dictionary
         if not any(current_player.get_herd.values()):
             print("Oh no it's the fox! Luckily there are no animals in the player's herd to update.")
             return True
@@ -278,8 +264,9 @@ class GameManager:
 
         if current_player.get_herd["Foxhound"] > 0:
             print("'Woof Woof!' Foxhound is in herd. No animals lost to the fox. Removing 1 Foxhound.")
-            current_herd = current_player.get_herd["Foxhound"]
-            current_player.update_herd("Foxhound", current_herd - 1)
+            #current_herd = current_player.get_herd["Foxhound"]
+            #current_player.update_herd("Foxhound", current_herd - 1)
+            self.transfer_animals(current_player.get_herd, main_herd_dict, "Foxhound", 1)
             return True
         else:
             print("Foxhound is not in herd. Losing all rabbits.")
@@ -287,11 +274,13 @@ class GameManager:
             current_player.update_herd("Rabbit", 0)
 
             # Add lost rabbits back to the main herd, but ensure we don't exceed the max count
-            self.add_to_main_herd("Rabbit", lost_rabbits)
+            # self.add_to_main_herd("Rabbit", lost_rabbits)
+            self.transfer_animals(current_player.get_herd, main_herd_dict,  "Rabbit", lost_rabbits)
             return False
 
     def handle_wolf(self, current_player) -> bool:
         """Handle the wolf event."""
+        main_herd_dict = self.get_main_herd()  # Store the main herd as a dictionary
         if not any(current_player.get_herd.values()):
             print("Oh no it's the wolf! Luckily there are no animals in player herd to update.")
             return True
@@ -300,7 +289,8 @@ class GameManager:
 
         if current_player.get_herd["Wolfhound"] > 0:
             print("'Woof Woof!' Wolfhound is in herd. No animals lost to wolf. Removing 1 Wolfhound.")
-            current_player.update_herd("Wolfhound", current_player.get_herd["Wolfhound"] - 1)
+            #current_player.update_herd("Wolfhound", current_player.get_herd["Wolfhound"] - 1)
+            self.transfer_animals(current_player.get_herd, main_herd_dict, "Wolfhound", 1)
             return True
         else:
             print("Wolfhound not in herd. You lost all animals except Horse and Foxhound.")
@@ -308,7 +298,8 @@ class GameManager:
                 if animal not in ["Horse", "Foxhound"]:
                     lost_animals = current_player.get_herd[animal]
                     current_player.update_herd(animal, 0)
-                    self.add_to_main_herd(animal, lost_animals)  # Return lost animals to the main herd
+                    #self.add_to_main_herd(animal, lost_animals)  # Return lost animals to the main herd
+                    self.transfer_animals( current_player.get_herd, main_herd_dict, animal, lost_animals)
             return False
 
     def post_exchange_request(self, requestor, from_animal, to_animal):
