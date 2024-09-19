@@ -53,7 +53,7 @@ def game():
 
     return render_template('game.html',
                            players=players,  # Player names to display in the game
-                           herd=ref_game_manager.get_main_herd(),  # Main herd to display in the game
+                           herd=ref_game_manager.main_herd.get_herd(),  # Main herd to display in the game
                            )
 
 
@@ -85,8 +85,8 @@ def roll_dice_for_current_player():
         'green': result_green,
         'red': result_red,
         'current_player_index': player_index,
-        'main_herd': game_manager.get_main_herd(),  # This is now a dictionary
-        'player_herd': current_player.get_herd    # This is now a dictionary
+        'main_herd': game_manager.main_herd.get_herd(),  # This is now a dictionary
+        'player_herd': current_player.get_herd()    # This is now a dictionary
     }
 
     return jsonify(response_data)
@@ -95,7 +95,7 @@ def roll_dice_for_current_player():
 @app.route('/get-herd/<int:player_index>', methods=['GET'])
 def get_player_herd(player_index):
     """Route to get the herd of the given player."""
-    player_herd = game_manager.players[player_index].get_herd
+    player_herd = game_manager.players[player_index].get_herd()
     return jsonify(herd=player_herd)
 
 

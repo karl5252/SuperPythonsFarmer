@@ -208,6 +208,19 @@
                     <div class="animal-count">6</div>
                 </div>
         </div>
+             <div class="animal-tile">
+                <div class="image-wrapper">
+                    <img src="{{ url_for('static', filename='img/foxhound_snake.png') }}" alt="Foxhound">
+                    <div class="animal-count">3</div>
+                </div>
+        </div>
+        <div class="animal-tile">
+                <div class="image-wrapper">
+                    <img src="{{ url_for('static', filename='img/wolfhound_snake.png') }}" alt="Wolfhound">
+                    <div class="animal-count">1</div>
+                </div>
+        </div>
+
     </div>
 
     <!-- Dice Display (Center) -->
@@ -286,25 +299,25 @@
         <div class="animal-tile">
             <div class="image-wrapper">
                 <img src="{{ url_for('static', filename='img/bun_snake.png') }}" alt="Rabbit">
-                <div class="animal-count">10</div>
+                <div class="animal-count">0</div>
             </div>
         </div>
         <div class="animal-tile">
             <div class="image-wrapper">
                 <img src="{{ url_for('static', filename='img/sheep_snake.png') }}" alt="Sheep">
-                <div class="animal-count">5</div>
+                <div class="animal-count">0</div>
             </div>
         </div>
         <div class="animal-tile">
             <div class="image-wrapper">
                 <img src="{{ url_for('static', filename='img/pig_snake.png') }}" alt="Pig">
-                <div class="animal-count">2</div>
+                <div class="animal-count">0</div>
             </div>
         </div>
         <div class="animal-tile">
             <div class="image-wrapper">
                 <img src="{{ url_for('static', filename='img/cow_snake.png') }}" alt="Cow">
-                <div class="animal-count">1</div>
+                <div class="animal-count">0</div>
             </div>
         </div>
         <div class="animal-tile">
@@ -315,13 +328,13 @@
         </div>
         <div class="animal-tile">
             <div class="image-wrapper">
-                <img src="{{ url_for('static', filename='img/sdoggo_snake.png') }}" alt="Foxhound">
+                <img src="{{ url_for('static', filename='img/foxhound_snake.png') }}" alt="Foxhound">
                 <div class="animal-count">0</div>
             </div>
         </div>
         <div class="animal-tile">
             <div class="image-wrapper">
-                <img src="{{ url_for('static', filename='img/bdoggo_snake.png') }}" alt="Wolfhound">
+                <img src="{{ url_for('static', filename='img/wolfhound_snake.png') }}" alt="Wolfhound">
                 <div class="animal-count">0</div>
             </div>
         </div>
@@ -332,6 +345,7 @@
     // Global variable for current player
     let currentPlayer = 0;  // Default to Player 1 or dynamically update
     const players = {{ players|tojson }};
+
 
     // JavaScript to Handle Forfeit Button
     document.getElementById('forfeit-btn').addEventListener('click', function() {
