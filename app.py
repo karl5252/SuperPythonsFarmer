@@ -1,3 +1,4 @@
+""" Main application file for the game. """
 import os
 
 from flask import Flask, jsonify, request, render_template, redirect, url_for, session
@@ -23,6 +24,7 @@ def main_menu():
 
 @app.route('/start-game', methods=['POST'])
 def start_game():
+    """Start the game with the given player names."""
     data = request.get_json()
     player_names = data.get('player_names', [])
     ref_game_manager = get_game_manager()
@@ -37,12 +39,13 @@ def start_game():
 
         # Redirect to the game page
         return redirect(url_for('game'))
-    else:
-        return jsonify(error="Invalid player names, please try again."), 400
+
+    return jsonify(error="Invalid player names, please try again."), 400
 
 
 @app.route('/game')
 def game():
+    """Render the game page."""
     ref_game_manager = get_game_manager()
 
     if not ref_game_manager.players:
@@ -88,8 +91,16 @@ def roll_dice_for_current_player():
         'main_herd': game_manager.main_herd.get_herd(),  # This is now a dictionary
         'player_herd': current_player.get_herd()  # This is now a dictionary
     }
+    #player_index = (player_index + 1) % len(game_manager.players)
 
     return jsonify(response_data)
+
+
+@app.route('/get-players', methods=['GET'])
+def get_players():
+    """Route to get the list of players."""
+    players = [player.name for player in game_manager.players]
+    return jsonify(players=players)
 
 
 @app.route('/get-herd/<int:player_index>', methods=['GET'])
@@ -107,38 +118,76 @@ def check_player_victory(player_index):
     return jsonify(victory=has_won)
 
 
-@app.route('/exchange', methods=['POST'])
-def exchange_animals():
+@app.route('/post-exchange-request', methods=['POST'])
+def post_exchange_request():
+    """
+    Handles exchange requests between players and/or the main herd.
+    If exchanging with the main herd, process immediately.
+    If player-to-player, post the request.
+    """
     data = request.get_json()
 
-    player1_index = data['player1_index']
-    player2_index = data['player2_index']
-    request_index = data.get('request_index')  # Assuming we pass the index or ID of the exchange request
+    player_index = data['player_index']
+    give_animal = data['give_animal']
+    give_count = data['give_count']
+    receive_animal = data['receive_animal']
+    receive_count = data['receive_count']
 
-    # Retrieve players involved
-    player1 = game_manager.players[player1_index]
-    player2 = game_manager.players[player2_index]
+    player = game_manager.players[player_index]
 
-    # Retrieve the exchange request based on its index or unique ID
-    if 0 <= request_index < len(game_manager.exchange_requests):
-        exchange_request = game_manager.exchange_requests[request_index]
+    # Check if the exchange is with the main herd
+    if data.get('recipient') == 'main-herd':
+        # Process the exchange immediately with the main herd
+        if game_manager.process_exchange(
+                player,
+                game_manager.main_herd,
+                give_animal,
+                receive_animal,
+                give_count):
+            return jsonify(
+                success=True,
+                player_herd=player.get_herd(),
+                main_herd=game_manager.main_herd.get_herd()
+            )
 
-        # Process the exchange using the stored count1 and count2 in the request
-        if game_manager.process_exchange(player1, player2, exchange_request.from_animal, exchange_request.to_animal, exchange_request.count1, exchange_request.count2):
-            exchange_request.status = 'completed'  # Mark the request as completed
-            return jsonify(success=True, message="Exchange completed!")
-        else:
-            return jsonify(success=False, message="Exchange failed. Check animal counts.")
+        return jsonify(success=False, message="Main herd exchange failed.")
     else:
-        return jsonify(success=False, message="Invalid exchange request.")
+        # Handle player-to-player exchange by posting the request
+        recipient_name = data['player_index']
+        player = game_manager.players[recipient_name]
+
+        if game_manager.post_exchange_request(
+                player,
+                give_animal,
+                receive_animal,
+                give_count,
+                receive_count):
+            return jsonify(success=True, message="Exchange request posted!")
+
+        return jsonify(success=False, message="Failed to post exchange request.")
 
 
+@app.route('/view-exchange-requests', methods=['GET'])
+def view_exchange_requests():
+    pending_requests = [
+        {
+            'requestor_name': request.requestor.name,
+            'from_animal': request.from_animal,
+            'to_animal': request.to_animal,
+            'give_count': request.count1,
+            'receive_count': request.count2
+        }
+        for request in game_manager.exchange_requests if request.status == "pending"
+    ]
+    return jsonify(requests=pending_requests)
 
-@app.route('/reset-game', methods=['POST'])
-def reset_game():
-    """Reset the game state."""
-    game_manager.reset_game()
-    return jsonify(success=True, message="Game reset successfully.")
+
+@app.route('/forfeit', methods=['POST'])
+def forfeit():
+    """Handles when a player forfeits the game."""
+    # You can add logic here to handle the forfeit
+    game_manager.reset_game()  # Reset game state if that's the desired outcome
+    return jsonify(success=True, message="Player forfeited and game reset.")
 
 
 if __name__ == '__main__':
