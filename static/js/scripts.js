@@ -28,6 +28,7 @@ function fetchPlayers() {
 
 // Initialize the game manager on page load
 document.addEventListener('DOMContentLoaded', function() {
+    //resetGameManager();
     fetchPlayers();
 });
 
@@ -37,10 +38,14 @@ if (players.length === 0) {
         .then(response => response.json())
         .then(data => {
             players = data;  // Cache the players array
+            currentPlayer = 0;  // Initialize to the first player
+            updatePlayerTurn();  // Update the player turn
             console.debug('Players:', players);
         })
         .catch(error => console.error('Error fetching players:', error));
-}
+} /*else {
+    updatePlayerTurn();  // Use the cached players if they exist
+}*/
 
 // Update the player turn indicator
 function updatePlayerTurn() {
@@ -53,20 +58,23 @@ function updatePlayerTurn() {
 document.getElementById('roll-dice-btn').addEventListener('click', function () {
     fetch('/roll-dice', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ player_index: currentPlayer })
+        headers: { 'Content-Type': 'application/json' }
     })
     .then(response => response.json())
     .then(data => {
         document.getElementById('dice-display').textContent = `🎲 ${data.green}, 🎲 ${data.red}`;
         updateHerd(data.player_herd, 'player-herd');
         updateHerd(data.main_herd, 'main-herd');
+
+        // Update the current player based on the backend response
         currentPlayer = data.current_player_index;
+
         console.debug('Current Player:', currentPlayer);
         updatePlayerTurn();  // Update the player turn UI
     })
     .catch(error => console.error('Error during dice roll:', error));
 });
+
 
 // Ensure modal is initialized with correct content
 function initializeModal() {

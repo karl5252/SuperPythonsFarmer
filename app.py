@@ -60,40 +60,33 @@ def game():
                            )
 
 
-@app.route('/process-menu', methods=['POST'])
-def process_menu():
-    """Process the player's menu choice."""
-    choice = request.json.get('choice')
-    result = game_manager.process_menu_choice(choice)
-    return jsonify(message=result)
-
-
 @app.route('/roll-dice', methods=['POST'])
 def roll_dice_for_current_player():
     """Route to roll the dice for the current player."""
-    data = request.get_json()
-    player_index = data.get('player_index')
+    player_index = game_manager.current_player_index  # Get the current player's index
+    current_player = game_manager.players[player_index]  # Fetch the current player object
 
-    # Process the dice roll for the current player
+    print(f"Processing dice roll for player: {current_player.name}")
+
+    # Process the dice roll
     result_green, result_red = roll_dice()
-
-    current_player = game_manager.players[player_index]
     game_manager.process_dice(current_player, result_green, result_red)
 
-    # Update the player index (move to the next player)
-    # player_index = (player_index + 1) % len(game_manager.players)  # Loop back to first player if at the end
-
-    # Prepare data to send back to the client
+    # Prepare data to send back to the client (before updating the player index)
     response_data = {
         'green': result_green,
         'red': result_red,
-        'current_player_index': player_index,
-        'main_herd': game_manager.main_herd.get_herd(),  # This is now a dictionary
-        'player_herd': current_player.get_herd()  # This is now a dictionary
+        'current_player_index': player_index,  # Send the current player index (before updating it)
+        'player_herd': current_player.get_herd(),  # Player herd after rolling
+        'main_herd': game_manager.main_herd.get_herd()  # Main herd
     }
-    #player_index = (player_index + 1) % len(game_manager.players)
+
+    # Update to the next player
+    game_manager.current_player_index = (player_index + 1) % len(game_manager.players)
+    print(f"Next player will be: {game_manager.players[game_manager.current_player_index].name}")
 
     return jsonify(response_data)
+
 
 
 @app.route('/get-players', methods=['GET'])
@@ -127,37 +120,37 @@ def post_exchange_request():
     """
     data = request.get_json()
 
-    player_index = data['player_index']
+    player_index = data['player_index']  # The player initiating the exchange
+    current_player = game_manager.players[player_index]
+    print(f"Processing exchange for player: {current_player.name}")
+
     give_animal = data['give_animal']
     give_count = data['give_count']
     receive_animal = data['receive_animal']
     receive_count = data['receive_count']
 
-    player = game_manager.players[player_index]
-
     # Check if the exchange is with the main herd
     if data.get('recipient') == 'main-herd':
-        # Process the exchange immediately with the main herd
         if game_manager.process_exchange(
-                player,
+                current_player,
                 game_manager.main_herd,
                 give_animal,
                 receive_animal,
                 give_count):
             return jsonify(
                 success=True,
-                player_herd=player.get_herd(),
+                player_herd=current_player.get_herd(),
                 main_herd=game_manager.main_herd.get_herd()
             )
-
         return jsonify(success=False, message="Main herd exchange failed.")
+
+    # Handle player-to-player exchange
     else:
-        # Handle player-to-player exchange by posting the request
-        recipient_name = data['player_index']
-        player = game_manager.players[recipient_name]
+        recipient_index = data['recipient_index']
+        # recipient_player = game_manager.players[recipient_index]
 
         if game_manager.post_exchange_request(
-                player,
+                current_player,
                 give_animal,
                 receive_animal,
                 give_count,

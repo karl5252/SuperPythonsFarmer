@@ -75,57 +75,21 @@ class GameManager:
         self.main_herd.update_herd("Horse", 6)
         self.main_herd.update_herd("Foxhound", 4)
         self.main_herd.update_herd("Wolfhound", 2)
+        exchange_board_rules_setup()
         self.exchange_requests = []  # List of active exchange requests
+
         self.state = GameState.MAIN_MENU
+
+    def add_player(self, name):
+        index = len(self.players)
+        player = Player(name, index)
+        self.players.append(player)
 
     def start_game(self):
         """Start the game."""
         self.state = GameState.IN_GAME
         exchange_board_rules_setup()
         return "Game started. Players are now playing."
-
-    def main_menu(self):
-        """Return menu options instead of printing."""
-        return {
-            "1": "Show Instructions",
-            "2": "Start Game",
-            "3": "Exit"
-        }
-
-    def show_instructions(self):
-        """Return game instructions as a string instead of printing."""
-        return (
-            "Super Farmer Game Instructions:\n"
-            "1. Roll the dice to determine the animals you get.\n"
-            "2. Each face of the dice represents a different animal:\n"
-            " - Cow, Pig, Rabbit, Sheep, Wolf, Fox, Horse.\n"
-            "3. The first animals of a given type are obtained by rolling two of the same animal.\n"
-            "4. If you have a pair of animals, you get the number of pairs instead of one.\n"
-            "5. Exchange rules:\n"
-            " - 6 Rabbits = 1 Sheep\n"
-            " - 2 Sheep = 1 Pig\n"
-            " - 3 Pigs = 1 Cow\n"
-            " - 2 Cows = 1 Horse\n"
-            " - 1 Sheep = 1 Foxhound\n"
-            " - 1 Cow = 1 Wolfhound\n"
-            "6. The first Cow and Horse can only be obtained via exchange.\n"
-            "7. Beware of the Wolf - it eats all animals except Horses. Use a Wolfhound to chase it away.\n"
-            "8. The Fox eats all Rabbits unless you have a Foxhound.\n"
-            "9. Goals: Collect all types of animals to win!\n"
-            "10. Enjoy the game and have fun!\n\n\n"
-            "Visit my blog for more details: https://www.qabites.blog/\n\n\n"
-
-        )
-
-    def process_menu_choice(self, choice):
-        """Process the player's menu choice."""
-        if choice == "1":
-            return self.show_instructions()
-        elif choice == "2":
-            return self.start_game()
-        elif choice == "3":
-            return "Exiting game."
-        return "Invalid choice."
 
     def process_dice(self, current_player: Player, result_green: str, result_red: str):
         """Process dice roll and transfer animals between the main herd and the current player."""
@@ -152,6 +116,7 @@ class GameManager:
                 self.main_herd.transfer_to(current_player, result_green, 1)
             if current_player.get_herd().get(result_red, 0) > 0:
                 self.main_herd.transfer_to(current_player, result_red, 1)
+        print(f"Processing dice roll for player: {current_player.name} has herd: {current_player.get_herd()}")
 
     def handle_fox(self, current_player: Player) -> bool:
         """Handle the fox event."""
@@ -175,51 +140,6 @@ class GameManager:
                     current_player.transfer_to(self.main_herd, animal, lost_animals)
             return False
 
-    def play(self):
-        """Play the game."""
-        self.state = GameState.IN_GAME
-
-        for _ in range(len(self.players)):
-            current_player = self.players[self.current_player_index]
-            print(f"\n\n{current_player.name}'s Turn:")
-            roll = roll_dice()
-            print(f"Roll: {roll}")
-            self.process_dice(current_player, roll[0], roll[1])
-
-            print(current_player.get_herd())
-            # add while loop for player to stop and let him decide to perform an exchange
-            while True:
-                print("Do you want to perform an exchange? (y/n)")
-                answer = input()
-                if answer == "y":
-                    print("Exchange rules (works both ways!):")
-                    print(" - 6 Rabbits = 1 Sheep")
-                    print(" - 2 Sheep = 1 Pig")
-                    print(" - 3 Pigs = 1 Cow")
-                    print(" - 2 Cows = 1 Horse")
-                    print(" - 1 Sheep = 1 Foxhound")
-                    print(" - 1 Cow = 1 Wolfhound")
-                    print("Which animal do you want to exchange?")
-                    animal_for_exchange = input()
-                    print("Which animal do you want to exchange for?")
-                    animal_to_exchange_for = input()
-                    self.process_exchange(current_player, animal_for_exchange, animal_to_exchange_for)
-                    print(current_player.get_herd())
-                elif answer == "n":
-                    break
-                else:
-                    print("Please enter y or n")
-
-            # Check if player is a victor and has one of each animal from the list: Rabbit, Sheep, Pig, Cow, Horse
-
-            if check_victory_condition(current_player):
-                print(f"{current_player.name} is the victor!")
-                self.state = GameState.GAME_OVER
-                break
-
-            # Alternate turn to the next player
-            self.current_player_index = (self.current_player_index + 1) % len(self.players)
-
     def process_exchange(self, player1: Player, player2: Union[Player, None], give_animal: str, receive_animal: str,
                          ratio: float) -> bool:
         """
@@ -233,12 +153,20 @@ class GameManager:
             print("Error: Invalid count or ratio value.")
             return False
 
+        if ratio >= 1:
+            return self._process_normal_exchange(player1, player2, give_animal, receive_animal, ratio, count1)
+        else:
+            return self._process_inverted_exchange(player1, player2, give_animal, receive_animal, ratio, count1)
+
+    def _process_normal_exchange(self, player1: Player, player2: Union[Player, None], give_animal: str,
+                                 receive_animal: str, ratio: float, count1: int) -> bool:
+        # Normal exchange
         print(f"Processing exchange: {give_animal} -> {receive_animal} with ratio {ratio}")
         print(f"Player1 herd: {player1.get_herd()}")
         print(f"Player1 has {count1} {give_animal}(s)")
 
+        count2 = int(count1 // ratio)
         if isinstance(player2, Player):
-            count2 = int(count1 // ratio)
             print(f"Player2 herd: {player2.get_herd()}")
             print(f"Player2 needs {count2} {receive_animal}(s)")
             if count1 >= ratio and player2.get_herd().get(receive_animal, 0) >= count2:
@@ -246,13 +174,35 @@ class GameManager:
                                                                                                      receive_animal,
                                                                                                      count2)
         else:
-            count2 = int(count1 // ratio)
             print(f"Main Herd: {self.main_herd.get_herd()}")
             print(f"Main Herd needs {count2} {receive_animal}(s)")
             if count1 >= ratio and self.main_herd.get_herd().get(receive_animal, 0) >= count2:
                 return player1.transfer_to(self.main_herd, give_animal, int(ratio)) and self.main_herd.transfer_to(
                     player1, receive_animal, count2)
+        return False
 
+    def _process_inverted_exchange(self, player1: Player, player2: Union[Player, None], give_animal: str,
+                                   receive_animal: str, ratio: float, count1: int) -> bool:
+        # If ratio is less than 1, swap the animals and adjust the ratio
+        ratio = 1 / ratio
+        count2 = int(count1 * ratio)
+        print(f"Processing inverted exchange: {give_animal} -> {receive_animal} with ratio {ratio}")
+        print(f"Player1 herd: {player1.get_herd()}")
+        print(f"Player1 has {count1} {give_animal}(s)")
+
+        if isinstance(player2, Player):
+            print(f"Player2 herd: {player2.get_herd()}")
+            print(f"Player2 needs {count2} {receive_animal}(s)")
+            if count1 >= 1 and player2.get_herd().get(receive_animal, 0) >= count2:
+                return player1.transfer_to(player2, give_animal, 1) and player2.transfer_to(player1, receive_animal,
+                                                                                            count2)
+        else:
+            print(f"Main Herd: {self.main_herd.get_herd()}")
+            print(f"Main Herd needs {count2} {receive_animal}(s)")
+            if count1 >= 1 and self.main_herd.get_herd().get(receive_animal, 0) >= count2:
+                return player1.transfer_to(self.main_herd, give_animal, 1) and self.main_herd.transfer_to(player1,
+                                                                                                          receive_animal,
+                                                                                                          count2)
         return False
 
     def post_exchange_request(self, requestor: Player, from_animal: str, to_animal: str, count1: int,
@@ -324,5 +274,3 @@ class GameManager:
         self.exchange_requests = []
         self.state = GameState.MAIN_MENU
         return "Game reset. Players can now join."
-
-
