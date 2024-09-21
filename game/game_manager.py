@@ -1,6 +1,6 @@
 """Game manager module."""
 import random
-from game.animal import Animal, Rabbit, Sheep, Pig, Cow, Foxhound, Wolfhound, Horse
+from typing import Union
 from game.exchange_board import ExchangeBoard
 from game.exchange_request import ExchangeRequest
 from game.game_state import GameState
@@ -32,10 +32,14 @@ def exchange_board_rules_setup():
 
 def roll_dice():
     """Roll the dice and return the results."""
-    dice_green_faces = ['Cow', 'Pig', 'Rabbit', 'Rabbit', 'Rabbit', 'Sheep', 'Rabbit', 'Sheep', 'Rabbit', 'Sheep',
-                        'Rabbit', 'Wolf']
-    dice_red_faces = ['Horse', 'Pig', 'Rabbit', 'Sheep', 'Rabbit', 'Rabbit', 'Pig', 'Rabbit', 'Rabbit', 'Sheep',
-                      'Rabbit', 'Fox']
+    dice_green_faces = ['Cow', 'Pig', 'Rabbit',
+                        'Rabbit', 'Rabbit', 'Sheep',
+                        'Rabbit', 'Sheep', 'Rabbit',
+                        'Sheep', 'Rabbit', 'Wolf']
+    dice_red_faces = ['Horse', 'Pig', 'Rabbit',
+                      'Sheep', 'Rabbit', 'Rabbit',
+                      'Pig', 'Rabbit', 'Rabbit',
+                      'Sheep', 'Rabbit', 'Fox']
 
     result_green = random.choice(dice_green_faces)
     result_red = random.choice(dice_red_faces)
@@ -121,8 +125,7 @@ class GameManager:
             return self.start_game()
         elif choice == "3":
             return "Exiting game."
-        else:
-            return "Invalid choice."
+        return "Invalid choice."
 
     def process_dice(self, current_player: Player, result_green: str, result_red: str):
         """Process dice roll and transfer animals between the main herd and the current player."""
@@ -173,6 +176,7 @@ class GameManager:
             return False
 
     def play(self):
+        """Play the game."""
         self.state = GameState.IN_GAME
 
         for _ in range(len(self.players)):
@@ -216,26 +220,40 @@ class GameManager:
             # Alternate turn to the next player
             self.current_player_index = (self.current_player_index + 1) % len(self.players)
 
-    def process_exchange(self, player1: Player, player2: Player, animal1: str, animal2: str, ratio: float) -> bool:
+    def process_exchange(self, player1: Player, player2: Union[Player, None], give_animal: str, receive_animal: str,
+                         ratio: float) -> bool:
         """
-        Process an exchange between two players (including Main Herd as player).
-        Handles both normal and inverse exchanges based on the ratio.
+        Process an exchange between two players or a player and the main herd.
         """
-        # Get the count of animal1 in player1's herd
-        count1 = player1.get_herd().get(animal1, 0)
+        print(f"Players exchange: {player1.name}")
+        try:
+            count1 = int(player1.get_herd().get(give_animal, 0))
+            ratio = float(ratio)
+        except ValueError:
+            print("Error: Invalid count or ratio value.")
+            return False
 
-        # Check if it's a normal or inverse exchange based on the ratio
-        if ratio >= 1:  # Normal exchange (e.g., 6 Rabbits = 1 Sheep)
-            count2 = int(count1 // ratio)  # Number of animal2 player1 should receive
-            if count1 >= ratio and player2.get_herd().get(animal2, 0) >= count2:
-                return player1.transfer_to(player2, animal1, int(ratio)) and player2.transfer_to(player1, animal2,
-                                                                                                 count2)
-        else:  # Inverse exchange (e.g., 1 Horse = 2 Cows)
-            count2 = int(1 / ratio)  # Number of animal2 player1 should receive
-            if count1 >= 1 and player2.get_herd().get(animal2, 0) >= count2:
-                return player1.transfer_to(player2, animal1, 1) and player2.transfer_to(player1, animal2, count2)
+        print(f"Processing exchange: {give_animal} -> {receive_animal} with ratio {ratio}")
+        print(f"Player1 herd: {player1.get_herd()}")
+        print(f"Player1 has {count1} {give_animal}(s)")
 
-        return False  # If conditions are not met, return False
+        if isinstance(player2, Player):
+            count2 = int(count1 // ratio)
+            print(f"Player2 herd: {player2.get_herd()}")
+            print(f"Player2 needs {count2} {receive_animal}(s)")
+            if count1 >= ratio and player2.get_herd().get(receive_animal, 0) >= count2:
+                return player1.transfer_to(player2, give_animal, int(ratio)) and player2.transfer_to(player1,
+                                                                                                     receive_animal,
+                                                                                                     count2)
+        else:
+            count2 = int(count1 // ratio)
+            print(f"Main Herd: {self.main_herd.get_herd()}")
+            print(f"Main Herd needs {count2} {receive_animal}(s)")
+            if count1 >= ratio and self.main_herd.get_herd().get(receive_animal, 0) >= count2:
+                return player1.transfer_to(self.main_herd, give_animal, int(ratio)) and self.main_herd.transfer_to(
+                    player1, receive_animal, count2)
+
+        return False
 
     def post_exchange_request(self, requestor: Player, from_animal: str, to_animal: str, count1: int,
                               count2: int) -> bool:
@@ -247,12 +265,12 @@ class GameManager:
         requestor_herd = requestor.get_herd()
 
         # Ensure requestor has enough animals to meet the count1 for exchange
-        if requestor_herd.get(from_animal, 0) >= count1:
+        if int(requestor_herd.get(from_animal, 0)) >= int(count1):
             # Calculate the ratio based on amounts offered and expected
-            ratio = count1 / count2
+            ratio = int(count1) / int(count2)
 
             # Create a new exchange request with the calculated ratio and offered amounts
-            new_request = ExchangeRequest(requestor, from_animal, to_animal, count1, count2, ratio)
+            new_request = ExchangeRequest(requestor, from_animal, to_animal, int(count1), int(count2), ratio)
             self.exchange_requests.append(new_request)
             return True
         return False

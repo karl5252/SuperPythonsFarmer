@@ -78,7 +78,7 @@ def roll_dice_for_current_player():
     game_manager.process_dice(current_player, result_green, result_red)
 
     # Update the player index (move to the next player)
-    player_index = (player_index + 1) % len(game_manager.players)  # Loop back to first player if at the end
+    # player_index = (player_index + 1) % len(game_manager.players)  # Loop back to first player if at the end
 
     # Prepare data to send back to the client
     response_data = {

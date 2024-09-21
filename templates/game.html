@@ -4,168 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Super Python Farmer - Game</title>
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            text-align: center;
-        }
-        /* Top bar for player turn indication */
-        #player-bar {
-            width: 100%;
-            height: 50px;
-            background-color: #4CAF50;  /* Default to green for Player 1 */
-            color: white;
-            font-size: 24px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
-        /* Main Herd Display */
-        #main-herd {
-            margin: 20px auto;
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);  /* Grid of animal tiles */
-            gap: 10px;
-            justify-content: center;
-            max-width: 600px;
-        }
-        .animal-tile {
-            padding: 20px;
-            background-color: #e0e0e0;
-            border-radius: 8px;
-            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-            position: relative;
-            text-align: center;
-        }
-        .image-wrapper {
-            position: relative;
-            display: inline-block;
-        }
-        .animal-tile img {
-            max-width: 80px;
-            display: block;
-            margin: 0 auto;
-        }
-        .animal-count {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 24px;
-            font-weight: bold;
-            color: white;  /* White seems good to consider YELLOW */
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);  /* for better readability */
-        }
-        /* Dice Display */
-        #dice-display {
-            margin: 20px 0;
-            font-size: 40px;
-        }
-        /* Exchange Rates (Left Column) */
-        #exchange-rates, #pending-requests {
-            width: 200px;
-            display: inline-block;
-            text-align: left;
-            margin: 20px;
-            vertical-align: top;
-        }
-        /* Pending Exchange Requests (Right Column) */
-        #pending-requests {
-            background-color: #f9f9f9;
-            border: 1px solid #ddd;
-            padding: 10px;
-            border-radius: 8px;
-        }
-        .request-item {
-            padding: 10px;
-            background-color: #fff;
-            margin-bottom: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        /* Player Herd at the bottom */
-        #player-herd {
-            margin: 30px auto;
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
-            justify-content: center;
-            max-width: 600px;
-        }
-        /* Control Buttons above the player's herd */
-        #controls {
-            margin-top: 40px;
-        }
-        .control-button {
-            padding: 15px 30px;
-            font-size: 20px;
-            margin: 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-        .control-button:hover {
-            background-color: #45a049;
-        }
-        /* Forfeit Button Styling */
-        #forfeit-btn {
-            padding: 10px 20px;
-            font-size: 16px;
-            margin: 5px;
-            background-color: #f44336;  /* Distinct red color */
-            color: white;
-            border: 1px solid #d32f2f;  /* Thin border */
-            border-radius: 8px;
-            cursor: pointer;
-            position: absolute; /* Position it absolutely on the page */
-            bottom: 20px; /* 20px from the bottom */
-            right: 20px;  /* 20px from the right */
-        }
-        #forfeit-btn:hover {
-            background-color: #e53935;
-        }
-
-		/* Modal for Exchange Request */
-        #exchange-modal {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            z-index: 1000;
-        }
-        #modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-        }
-        #exchange-modal select {
-            padding: 10px;
-            font-size: 18px;
-            margin: 10px;
-            width: 80%;
-        }
-        #exchange-modal button {
-            padding: 10px 20px;
-            font-size: 18px;
-            margin: 10px;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="{{ url_for('static', filename='js/scripts.js') }}" defer></script>
 </head>
 <body>
 
@@ -240,18 +80,7 @@
     <!-- Pending Exchange Requests (Right Column) -->
     <div id="pending-requests">
         <h3>Pending Exchange Requests</h3>
-        <div class="request-item">
-            Player 1: 6 Rabbits for 1 Sheep
-            <br>
-            <button class="accept-request">Accept</button>
-            <button class="ignore-request">Ignore</button>
-        </div>
-        <div class="request-item">
-            Player 2: 2 Sheep for 1 Pig
-            <br>
-            <button class="accept-request">Accept</button>
-            <button class="ignore-request">Ignore</button>
-        </div>
+
     </div>
 
     <!-- Control Buttons (Bottom-Center, Above Player's Herd) -->
@@ -261,16 +90,40 @@
     </div>
 
 	<!-- Exchange Modal Structure -->
-    <div id="exchange-modal" class="modal" style="display:none;">
-        <div class="modal-content">
-            <h3>Make an Exchange</h3>
-            <label for="exchange-with">Exchange with:</label>
-                <select id="exchange-with">
-                    <option value="main-herd">Main Herd</option>
-                    <option value="players">Players</option>
-                </select>
-            <br>
+<div id="exchange-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <h3>Make an Exchange</h3>
 
+        <!-- Dropdown to choose between main herd or players -->
+        <label for="exchange-with">Exchange with:</label>
+        <select id="exchange-with">
+            <option value="main-herd" selected>Main Herd</option>
+            <option value="players">Players</option>
+        </select>
+        <div class="modal-content">
+            <div id="selected-value-indicator">Selected: Main Herd</div>
+        </div>
+
+        <br><br>
+
+        <!-- Main Herd exchange radio buttons (initially hidden) -->
+        <div id="main-herd-exchange" style="display:none;">
+            <h4>Main Herd Exchange Options</h4>
+            <label>
+                <input type="radio" name="exchange-ratio" value="Rabbit-Sheep" data-ratio="6-1"> 6 Rabbits for 1 Sheep            </label>
+            <label>
+                <input type="radio" name="exchange-ratio" value="Sheep-Pig" data-ratio="2-1"> 2 Sheep for 1 Pig
+            </label>
+            <label>
+                <input type="radio" name="exchange-ratio" value="Pig-Cow" data-ratio="3-1"> 3 Pigs for 1 Cow
+            </label>
+            <label>
+                <input type="radio" name="exchange-ratio" value="Cow-Horse" data-ratio="2-1"> 2 Cows for 1 Horse
+            </label>
+        </div>
+
+        <!-- Player-to-Player exchange fields (default visible) -->
+        <div id="player-exchange">
             <!-- Dropdown 1: Select the animal to give -->
             <label for="give-animal">Animal to give:</label>
             <select id="give-animal">
@@ -304,14 +157,14 @@
             <!-- Input for the number of animals to receive -->
             <label for="receive-count">Amount to receive:</label>
             <input type="number" id="receive-count" min="1" value="1">
-
-            <br><br>
-
-            <!-- Modal Buttons -->
-            <button id="submit-exchange">Submit Exchange</button>
-            <button id="cancel-exchange">Cancel</button>
         </div>
+
+        <!-- Modal Buttons -->
+        <button id="submit-exchange">Submit Exchange</button>
+        <button id="cancel-exchange">Cancel</button>
     </div>
+</div>
+
 
 
     <!-- Modal with event -->
@@ -375,99 +228,5 @@
     </div>
 
 </body>
-<script>
-    // Global variable for current player
-    let currentPlayer = 0;  // Default to Player 1 or dynamically update
-    const players = {{ players|tojson }};
 
-
-    // JavaScript to Handle Forfeit Button
-    document.getElementById('forfeit-btn').addEventListener('click', function() {
-        if (confirm('Are you sure you want to forfeit the game?')) {
-        // Add AJAX call or game logic here to handle forfeit
-        fetch('/forfeit', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-            window.location.href = '/';  // Redirect to the main menu or any other appropriate action
-        }
-    });
-
-    // JavaScript to handle Exchange Modal
-
-    // Open the modal
-    document.getElementById('make-exchange-btn').addEventListener('click', function() {
-        document.getElementById('exchange-modal').style.display = 'block';
-    });
-
-    // Close the modal (cancel)
-    document.getElementById('cancel-exchange').addEventListener('click', function() {
-        document.getElementById('exchange-modal').style.display = 'none';
-    });
-
-    // Handle the submission of the exchange
-    document.getElementById('submit-exchange').addEventListener('click', function() {
-        const giveAnimal = document.getElementById('give-animal').value;
-        const receiveAnimal = document.getElementById('receive-animal').value;
-
-    // Add AJAX call or game logic here to process the exchange
-    console.log(`Exchange request: Give ${giveAnimal}, Receive ${receiveAnimal}`);
-
-    // Close the modal after submission
-    document.getElementById('exchange-modal').style.display = 'none';
-    });
-
-    // Triggering the dice roll
-    document.getElementById('roll-dice-btn').addEventListener('click', function() {
-        fetch('/roll-dice', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                player_index: currentPlayer  // Send the current player's index
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Update the dice display
-            document.getElementById('dice-display').textContent = `🎲 ${data.green}, 🎲 ${data.red}`;
-
-            // Update the player's herd
-            updateHerd(data.player_herd, 'player-herd');
-
-            // Update the main herd
-            updateHerd(data.main_herd, 'main-herd');
-
-            // Update the current player indicator using player names
-            const playerColors = ['#4CAF50', '#2196F3', '#FFC107', '#FF5722'];
-            currentPlayer = data.current_player_index;  // Update current player index
-            document.getElementById('player-bar').textContent = `${players[currentPlayer]}'s Turn`;  // Display player name
-            document.getElementById('player-bar').style.backgroundColor = playerColors[currentPlayer];
-        })
-        .catch(error => console.error('Error:', error));
-    });
-
-
-    // Function to update the herd display
-    function updateHerd(herd, herdId) {
-        const herdDisplay = document.getElementById(herdId);
-        const animalTiles = herdDisplay.getElementsByClassName('animal-tile');
-
-        for (let i = 0; i < animalTiles.length; i++) {
-           const animalImg = animalTiles[i].getElementsByTagName('img')[0];
-          const animalType = animalImg.alt;  // Get animal type from alt attribute
-          const animalCount = animalTiles[i].getElementsByClassName('animal-count')[0];
-
-          if (herd[animalType]) {
-              animalCount.textContent = herd[animalType];  // Update based on animal type
-            } else {
-              animalCount.textContent = '0';  // If animal is not found in herd, default to 0
-            }
-        }
-    }
-
-</script>
 </html>
