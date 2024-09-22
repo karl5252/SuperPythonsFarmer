@@ -9,26 +9,24 @@ from game.player import Player
 
 def exchange_board_rules_setup():
     """Set up the exchange board rules."""
-    ExchangeBoard.set_exchange_rate("Rabbit", "Sheep", 6)
-    ExchangeBoard.set_exchange_rate("Sheep", "Pig", 2)
-    ExchangeBoard.set_exchange_rate("Pig", "Cow", 3)
-    ExchangeBoard.set_exchange_rate("Cow", "Horse", 2)
-    ExchangeBoard.set_exchange_rate("Horse", "Cow", 1 / 2)
-    ExchangeBoard.set_exchange_rate("Cow", "Pig", 1 / 3)
-    ExchangeBoard.set_exchange_rate("Pig", "Sheep", 1 / 2)
-    ExchangeBoard.set_exchange_rate("Sheep", "Rabbit", 1 / 6)
-    ExchangeBoard.set_exchange_rate("Sheep", "Foxhound", 1)
-    ExchangeBoard.set_exchange_rate("Cow", "Wolfhound", 1)
+    ExchangeBoard.set_exchange_rate("Rabbit", "Sheep", 6, 1)
+    ExchangeBoard.set_exchange_rate("Sheep", "Pig", 2, 1)
+    ExchangeBoard.set_exchange_rate("Pig", "Cow", 3, 1)
+    ExchangeBoard.set_exchange_rate("Cow", "Horse", 2, 1)
+    ExchangeBoard.set_exchange_rate("Horse", "Cow", 1, 2)
+    ExchangeBoard.set_exchange_rate("Cow", "Pig", 1, 3)
+    ExchangeBoard.set_exchange_rate("Pig", "Sheep", 1, 2)
+    ExchangeBoard.set_exchange_rate("Sheep", "Rabbit", 1, 6)
+    ExchangeBoard.set_exchange_rate("Sheep", "Foxhound", 1, 1)
+    ExchangeBoard.set_exchange_rate("Cow", "Wolfhound", 1, 1)
     # Additional direct exchanges
-    ExchangeBoard.set_exchange_rate("Foxhound", "Rabbit", 12)  # Exchange 1 Foxhound for 12 Rabbits
-    ExchangeBoard.set_exchange_rate("Wolfhound", "Sheep", 6)  # Exchange 1 Wolfhound for 6 Sheep
-    ExchangeBoard.set_exchange_rate("Horse", "Pigs", 6)  # Exchange 1 Horse for 6 Pigs
-    ExchangeBoard.set_exchange_rate("Horse", "Sheep", 12)  # Exchange 1 Horse for 12 Sheep
-
-    ExchangeBoard.set_exchange_rate("Cow", "Sheep", 6)  # Exchange 1 Cow for 6 Sheep
-    ExchangeBoard.set_exchange_rate("Cow", "Rabbits", 36)  # Exchange 1 Cow for 36 Rabbits
-
-    ExchangeBoard.set_exchange_rate("Pig", "Rabbits", 12)  # Exchange 1 Pig for 12 Rabbits
+    ExchangeBoard.set_exchange_rate("Foxhound", "Rabbit", 1, 12)  # Exchange 1 Foxhound for 12 Rabbits
+    ExchangeBoard.set_exchange_rate("Wolfhound", "Sheep", 1, 6)  # Exchange 1 Wolfhound for 6 Sheep
+    ExchangeBoard.set_exchange_rate("Horse", "Pig", 1, 6)  # Exchange 1 Horse for 6 Pigs
+    ExchangeBoard.set_exchange_rate("Horse", "Sheep", 1, 12)  # Exchange 1 Horse for 12 Sheep
+    ExchangeBoard.set_exchange_rate("Cow", "Sheep", 1, 6)  # Exchange 1 Cow for 6 Sheep
+    ExchangeBoard.set_exchange_rate("Cow", "Rabbit", 1, 36)  # Exchange 1 Cow for 36 Rabbits
+    ExchangeBoard.set_exchange_rate("Pig", "Rabbit", 1, 12)  # Exchange 1 Pig for 12 Rabbits
 
 
 def roll_dice():
