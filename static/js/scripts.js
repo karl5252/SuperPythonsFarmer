@@ -74,11 +74,38 @@ document.getElementById('roll-dice-btn').addEventListener('click', function () {
 
         console.debug('Current Player:', currentPlayer);
         updatePlayerTurn();  // Update the player turn UI
+        if (data.green === "Wolf" || data.red === "Wolf") {
+            showEventModal('wolf-attack');
+        }
+        if (data.green === "Fox" || data.red === "Fox") {
+            showEventModal('fox-swipe');
+    }
     })
     .catch(error =>
     {console.error('Error during dice roll:', error)
     showToaster('Error during dice roll.', 'negative');});
 });
+
+    // Handle modal with event - wolf attack or fox swiping
+    function showEventModal(eventType) {
+        const eventModal = document.getElementById('event-modal');
+        const eventMessage = document.getElementById('event-description');
+        const eventImage = document.getElementById('event-image');
+        const eventTitle = document.getElementById('event-title');
+
+        if (eventType === 'wolf-attack') {
+            eventModal.style.display = 'block';
+            eventTitle.textContent = 'Event: Wolf Attack!';
+            eventMessage.textContent = 'The wolf has attacked your herd! Pray you have wolf repellent!';
+            eventImage.src = '/static/img/wolf_snake.png';
+        } else {
+            eventModal.style.display = 'block';
+            eventTitle.textContent = 'Event: Fox Swipe!';
+            eventMessage.textContent = 'The fox has swiped some of your animals! Be prepared!';
+            eventImage.src = '/static/img/fox_snake.png';
+        }
+    }
+
 
 
 // Ensure modal is initialized with correct content
@@ -108,6 +135,10 @@ document.getElementById('make-exchange-btn').addEventListener('click', function(
 document.getElementById('cancel-exchange').addEventListener('click', function() {
     document.getElementById('exchange-modal').style.display = 'none';
 });
+// Handle the event modal close
+document.getElementById('close-event').addEventListener('click', function() {
+     document.getElementById('event-modal').style.display = 'none';
+     });
 
 // Toggle between Main Herd and Player exchange when dropdown value changes
 document.getElementById('exchange-with').addEventListener('change', function() {
@@ -120,7 +151,7 @@ function toggleExchangeMode(exchangeWith) {
     const playerExchangeSection = document.getElementById('player-exchange');
 
     if (exchangeWith === 'main-herd') {
-        mainHerdSection.style.display = 'block';
+        mainHerdSection.style.display = 'flex';
         playerExchangeSection.style.display = 'none';
     } else {
         mainHerdSection.style.display = 'none';
@@ -299,6 +330,40 @@ function refreshPendingRequests() {
     setTimeout(() => {
         toasterContainer.removeChild(toaster);
     }, 5000);
+}
+document.addEventListener('DOMContentLoaded', function() {
+    // Fetch exchange rules from the backend
+    fetch('/exchange-rules')
+        .then(response => response.json())
+        .then(data => {
+            console.debug('Exchange Rules:', data);
+            populateExchangeOptions(data);
+        })
+        .catch(error => {
+            console.error('Error fetching exchange rules:', error);
+            showToaster('Error fetching exchange rules.', 'negative');
+        });
+});
+
+function populateExchangeOptions(rules) {
+    const mainHerdExchangeDiv = document.getElementById('main-herd-exchange');
+    const exchangeRatesDiv = document.getElementById('exchange-rates');
+    console.debug('Rules:', rules);
+
+    for (const [key, value] of Object.entries(rules)) {
+        const [fromAnimal, toAnimal] = key.split('-');
+        const { offered_amount: offeredAmount, requested_amount: requestedAmount } = value;
+        console.debug('From:', fromAnimal, 'To:', toAnimal);
+        console.debug('Offered:', offeredAmount, 'Requested:', requestedAmount);
+
+        const label = document.createElement('label');
+        label.innerHTML = `<input type="radio" name="exchange-ratio" value="${fromAnimal}-${toAnimal}" data-ratio="${offeredAmount}-${requestedAmount}"> ${offeredAmount} ${fromAnimal}s for ${requestedAmount} ${toAnimal}`;
+        mainHerdExchangeDiv.appendChild(label);
+
+        const rateItem = document.createElement('div');
+        rateItem.textContent = `${offeredAmount} ${fromAnimal}s for ${requestedAmount} ${toAnimal}`;
+        exchangeRatesDiv.appendChild(rateItem);
+    }
 }
 
 

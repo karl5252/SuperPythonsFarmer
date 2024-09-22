@@ -1,7 +1,10 @@
 """ Main application file for the game. """
 import os
+from typing import Dict, Any
 
 from flask import Flask, jsonify, request, render_template, redirect, url_for, session
+
+from game.exchange_board import ExchangeBoard
 from game.game_manager import GameManager, check_victory_condition, roll_dice
 from game.player import Player
 
@@ -233,6 +236,13 @@ def forfeit():
     # You can add logic here to handle the forfeit
     game_manager.reset_game()  # Reset game state if that's the desired outcome
     return jsonify(success=True, message="Player forfeited and game reset.")
+
+
+@app.route('/exchange-rules', methods=['GET'])
+def exchange_rules():
+    """Render the exchange rules page."""
+    rules = ExchangeBoard.get_all_exchange_rates()
+    return jsonify(rules)
 
 
 if __name__ == '__main__':

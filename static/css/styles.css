@@ -18,15 +18,15 @@
         }
         /* Main Herd Display */
         #main-herd {
-            margin: 20px auto;
+            margin: 10px auto;
             display: grid;
-            grid-template-columns: repeat(5, 1fr);  /* Grid of animal tiles */
+            grid-template-columns: repeat(7, 1fr);  /* Grid of animal tiles */
             gap: 10px;
             justify-content: center;
             max-width: 600px;
         }
         .animal-tile {
-            padding: 20px;
+            padding: 5px;
             background-color: #e0e0e0;
             border-radius: 8px;
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
@@ -52,6 +52,13 @@
             color: white;  /* White seems good to consider YELLOW */
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);  /* for better readability */
         }
+        #main-container
+        {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px;
+        }
         /* Dice Display */
         #dice-display {
             margin: 20px 0;
@@ -66,7 +73,7 @@
             vertical-align: top;
         }
         /* Pending Exchange Requests (Right Column) */
-        #pending-requests {
+        #exchange-rates, #pending-requests {
             background-color: #f9f9f9;
             border: 1px solid #ddd;
             padding: 10px;
@@ -83,7 +90,7 @@
         #player-herd {
             margin: 30px auto;
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(7, 1fr);
             gap: 10px;
             justify-content: center;
             max-width: 600px;
@@ -124,7 +131,7 @@
         }
 
 		/* Modal for Exchange Request */
-        #exchange-modal {
+        #exchange-modal, #event-modal {
             display: none;
             position: fixed;
             top: 50%;
@@ -164,12 +171,27 @@
             margin-top: 10px;
         }
 
+        /* Ensure two columns in exchange modal */
+        #main-herd-exchange {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px; /* Add gap for better spacing */
+            margin-bottom: 10px;
+        }
+
+        #main-herd-exchange label {
+            flex: 1 1 calc(50% - 10px); /* Adjust the width to fit two columns with gap */
+            margin-bottom: 10px; /* Add margin for better spacing */
+        }
+
+        /*Toaster Styling */
         #toaster-container {
             position: fixed;
             top: 20px;
             right: 20px;
             z-index: 1000;
         }
+
 
         .toaster {
             display: flex;
