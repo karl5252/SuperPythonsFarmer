@@ -88,7 +88,6 @@ def roll_dice_for_current_player():
     return jsonify(response_data)
 
 
-
 @app.route('/get-players', methods=['GET'])
 def get_players():
     """Route to get the list of players."""
@@ -146,7 +145,7 @@ def post_exchange_request():
 
     # Handle player-to-player exchange
     else:
-        recipient_index = data['recipient_index']
+        # recipient_index = data['recipient_index']
         # recipient_player = game_manager.players[recipient_index]
 
         if game_manager.post_exchange_request(
@@ -160,15 +159,62 @@ def post_exchange_request():
         return jsonify(success=False, message="Failed to post exchange request.")
 
 
+@app.route('/accept-exchange-request', methods=['POST'])
+def accept_exchange_request():
+    """Similar to post exchange request, but for the recipient to accept the request."""
+    data = request.get_json()
+
+    player_index = data['player_index']  # The player initiating the exchange
+    recipient_player = game_manager.players[player_index]
+    print(f"Processing exchange for player: {recipient_player.name}")
+    # print data
+    print(f"data: {data}")
+
+    give_animal = data['give_animal']
+    give_count = data['give_count']
+    receive_animal = data['from_animal']
+    receive_count = data['receive_count']
+
+    # Find the exchange request to accept
+    request_to_accept = None
+    for req in game_manager.exchange_requests:
+        if req.requestor == recipient_player and \
+                req.give_animal == give_animal and \
+                req.receive_animal == receive_animal and \
+                req.give_count == give_count and \
+                req.receive_count == receive_count:
+            request_to_accept = req
+            break
+
+    if not request_to_accept:
+        return jsonify(success=False, message="Exchange request not found.")
+
+    # Process the exchange
+    if game_manager.process_exchange(
+            recipient_player,
+            request_to_accept.requestor,
+            give_animal,
+            receive_animal,
+            give_count):
+        return jsonify(
+            success=True,
+            player_herd=recipient_player.get_herd(),
+            other_player_herd=request_to_accept.requestor.get_herd()
+        )
+
+    return jsonify(success=False, message="Exchange failed.")
+
+
 @app.route('/view-exchange-requests', methods=['GET'])
 def view_exchange_requests():
+    """Route to view pending exchange requests."""
     pending_requests = [
         {
             'requestor_name': request.requestor.name,
             'from_animal': request.from_animal,
             'to_animal': request.to_animal,
-            'give_count': request.count1,
-            'receive_count': request.count2
+            'give_count': request.give_count,
+            'receive_amount': request.receive_amount
         }
         for request in game_manager.exchange_requests if request.status == "pending"
     ]

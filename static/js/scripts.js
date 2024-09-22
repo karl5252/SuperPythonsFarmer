@@ -204,4 +204,66 @@ document.getElementById('forfeit-btn').addEventListener('click', function() {
     window.location.href = '/';
 });
 
+// Function to refresh pending requests
+function refreshPendingRequests() {
+    fetch('/view-exchange-requests')
+        .then(response => response.json())
+        .then(data => {
+            if (data.requests.length > 0) {
+                document.getElementById('pending-requests').style.display = 'block';
+                const requestsList = document.getElementById('requests-list');
+                //requestsList.innerHTML = '';  // Clear the list before adding new items
+
+                data.requests.forEach(request => {
+                    console.debug('Request:', request); //{from_animal: 'Sheep', give_count: 1, receive_count: 10, requestor_name: 'Writing', to_animal: 'Rabbit'}from_animal: "Sheep"give_count: 1receive_count: 10requestor_name: "Writing"to_animal: "Rabbit"[[Prototype]]: Object
+                    // Create the Accept button
+                    const acceptButton = document.createElement('button');
+                        acceptButton.textContent = 'Accept';
+                        acceptButton.addEventListener('click', function() {
+                            acceptExchangeRequest(request);
+                    });
+
+                    const requestItem = document.createElement('li');
+                    requestItem.className = 'request-item';
+                    requestItem.textContent = 'Request from ' + request.requestor_name + ': ' + request.give_amount + ' ' + request.give_animal + ' for ' + request.receive_amount + ' ' + request.receive_animal ;
+                    requestItem.appendChild(acceptButton); // Add the Accept button to the list item
+                    requestsList.appendChild(requestItem);
+                });
+            } else {
+                document.getElementById('pending-requests').style.display = 'none';
+            }
+        })
+        .catch(error => console.error('Error fetching pending requests:', error));
+
+        // Function to handle the acceptance of an exchange request
+    function acceptExchangeRequest(request) {
+    const payload = {
+        player_index: currentPlayer,
+        requestor_name: request.requestor_name,
+        from_animal: request.give_animal,
+        give_count: request.receive_amount,
+        to_animal: request.receive_animal,
+        receive_count: request.receive_amount
+    };
+
+    fetch('/accept-exchange-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert("Exchange accepted!");
+            updateHerd(data.player_herd, 'player-herd');  // Update player's herd
+            updateHerd(data.main_herd, 'main-herd');      // Update main herd
+            refreshPendingRequests();  // Refresh pending requests
+        } else {
+            alert("Failed to accept exchange.");
+        }
+    })
+    .catch(error => console.error('Error accepting exchange:', error));
+}
+}
+
 

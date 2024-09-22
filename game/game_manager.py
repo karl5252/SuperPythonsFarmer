@@ -20,9 +20,10 @@ def exchange_board_rules_setup():
     ExchangeBoard.set_exchange_rate("Sheep", "Foxhound", 1)
     ExchangeBoard.set_exchange_rate("Cow", "Wolfhound", 1)
     # Additional direct exchanges
+    ExchangeBoard.set_exchange_rate("Foxhound", "Rabbit", 12)  # Exchange 1 Foxhound for 12 Rabbits
+    ExchangeBoard.set_exchange_rate("Wolfhound", "Sheep", 6)  # Exchange 1 Wolfhound for 6 Sheep
     ExchangeBoard.set_exchange_rate("Horse", "Pigs", 6)  # Exchange 1 Horse for 6 Pigs
     ExchangeBoard.set_exchange_rate("Horse", "Sheep", 12)  # Exchange 1 Horse for 12 Sheep
-    ExchangeBoard.set_exchange_rate("Horse", "Rabbits", 72)  # Exchange 1 Horse for 72 Rabbits
 
     ExchangeBoard.set_exchange_rate("Cow", "Sheep", 6)  # Exchange 1 Cow for 6 Sheep
     ExchangeBoard.set_exchange_rate("Cow", "Rabbits", 36)  # Exchange 1 Cow for 36 Rabbits
