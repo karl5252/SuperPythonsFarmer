@@ -1,0 +1,237 @@
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            text-align: center;
+        }
+        /* Top bar for player turn indication */
+        #player-bar {
+            width: 100%;
+            height: 50px;
+            background-color: #4CAF50;  /* Default to green for Player 1 */
+            color: white;
+            font-size: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        /* Main Herd Display */
+        #main-herd {
+            margin: 10px auto;
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);  /* Grid of animal tiles */
+            gap: 10px;
+            justify-content: center;
+            max-width: 600px;
+        }
+        .animal-tile {
+            padding: 5px;
+            background-color: #e0e0e0;
+            border-radius: 8px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+            position: relative;
+            text-align: center;
+        }
+        .image-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+        .animal-tile img {
+            max-width: 80px;
+            display: block;
+            margin: 0 auto;
+        }
+        .animal-count {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            font-weight: bold;
+            color: white;  /* White seems good to consider YELLOW */
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);  /* for better readability */
+        }
+        #main-container
+        {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px;
+        }
+        /* Dice Display */
+        #dice-display {
+            margin: 20px 0;
+            font-size: 40px;
+        }
+        /* Exchange Rates (Left Column) */
+        #exchange-rates, #pending-requests {
+            width: 200px;
+            display: inline-block;
+            text-align: left;
+            margin: 20px;
+            vertical-align: top;
+        }
+        /* Pending Exchange Requests (Right Column) */
+        #exchange-rates, #pending-requests {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .request-item {
+            padding: 10px;
+            background-color: #fff;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        /* Player Herd at the bottom */
+        #player-herd {
+            margin: 30px auto;
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            justify-content: center;
+            max-width: 600px;
+        }
+        /* Control Buttons above the player's herd */
+        #controls {
+            margin-top: 40px;
+        }
+        .control-button {
+            padding: 15px 30px;
+            font-size: 20px;
+            margin: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .control-button:hover {
+            background-color: #45a049;
+        }
+        /* Forfeit Button Styling */
+        #forfeit-btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 5px;
+            background-color: #f44336;  /* Distinct red color */
+            color: white;
+            border: 1px solid #d32f2f;  /* Thin border */
+            border-radius: 8px;
+            cursor: pointer;
+            position: absolute; /* Position it absolutely on the page */
+            bottom: 20px; /* 20px from the bottom */
+            right: 20px;  /* 20px from the right */
+        }
+        #forfeit-btn:hover {
+            background-color: #e53935;
+        }
+
+		/* Modal for Exchange Request */
+        #exchange-modal, #event-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+        }
+        #modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        #exchange-modal select {
+            padding: 10px;
+            font-size: 18px;
+            margin: 10px;
+            width: 80%;
+        }
+        #exchange-modal button {
+            padding: 10px 20px;
+            font-size: 18px;
+            margin: 10px;
+        }
+
+        #selected-value-indicator {
+            font-weight: bold;
+            color: green;
+            margin-top: 10px;
+        }
+
+        /* Ensure two columns in exchange modal */
+        #main-herd-exchange {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px; /* Add gap for better spacing */
+            margin-bottom: 10px;
+        }
+
+        #main-herd-exchange label {
+            flex: 1 1 calc(50% - 10px); /* Adjust the width to fit two columns with gap */
+            margin-bottom: 10px; /* Add margin for better spacing */
+        }
+
+        /*Toaster Styling */
+        #toaster-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+
+        .toaster {
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            color: white;
+            font-size: 16px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            animation: slide-in 0.5s ease-out, fade-out 0.5s ease-out 4.5s forwards;
+        }
+
+        .toaster.positive {
+            background-color: green;
+        }
+
+        .toaster.informative {
+            background-color: #FFA500;
+        }
+
+        .toaster.negative {
+            background-color: red;
+        }
+
+
+        @keyframes slide-in {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fade-out {
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
