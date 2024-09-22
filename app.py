@@ -135,7 +135,8 @@ def post_exchange_request():
                 game_manager.main_herd,
                 give_animal,
                 receive_animal,
-                give_count):
+                give_count,
+                receive_count):
             return jsonify(
                 success=True,
                 player_herd=current_player.get_herd(),
@@ -164,25 +165,27 @@ def accept_exchange_request():
     """Similar to post exchange request, but for the recipient to accept the request."""
     data = request.get_json()
 
-    player_index = data['player_index']  # The player initiating the exchange
+    player_index = data['player_index']  # The player accepting the exchange
     recipient_player = game_manager.players[player_index]
     print(f"Processing exchange for player: {recipient_player.name}")
-    # print data
     print(f"data: {data}")
 
-    give_animal = data['give_animal']
+    give_animal = data['from_animal']
     give_count = data['give_count']
-    receive_animal = data['from_animal']
+    receive_animal = data['to_animal']
     receive_count = data['receive_count']
 
     # Find the exchange request to accept
     request_to_accept = None
+    print("exchange_requests: ")
     for req in game_manager.exchange_requests:
-        if req.requestor == recipient_player and \
-                req.give_animal == give_animal and \
-                req.receive_animal == receive_animal and \
-                req.give_count == give_count and \
-                req.receive_count == receive_count:
+        print(vars(req))
+    for req in game_manager.exchange_requests:
+        if req.requestor != recipient_player and \
+                req.from_animal == give_animal and \
+                req.to_animal == receive_animal and \
+                req.amount_offered == give_count and \
+                req.amount_wanted == receive_count:
             request_to_accept = req
             break
 
@@ -191,11 +194,14 @@ def accept_exchange_request():
 
     # Process the exchange
     if game_manager.process_exchange(
-            recipient_player,
             request_to_accept.requestor,
+            recipient_player,
             give_animal,
             receive_animal,
-            give_count):
+            give_count,
+            receive_count):
+        request_to_accept.status = "accepted"
+        game_manager.exchange_requests.remove(request_to_accept)
         return jsonify(
             success=True,
             player_herd=recipient_player.get_herd(),
@@ -213,8 +219,8 @@ def view_exchange_requests():
             'requestor_name': request.requestor.name,
             'from_animal': request.from_animal,
             'to_animal': request.to_animal,
-            'give_count': request.give_count,
-            'receive_amount': request.receive_amount
+            'give_count': request.amount_offered,
+            'receive_count': request.amount_wanted
         }
         for request in game_manager.exchange_requests if request.status == "pending"
     ]

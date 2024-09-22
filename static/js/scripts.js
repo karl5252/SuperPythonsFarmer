@@ -50,7 +50,10 @@ if (players.length === 0) {
 // Update the player turn indicator
 function updatePlayerTurn() {
     if (players.length > 0) {
+        const hex_colors = ['#4CAF50', '#FF5722', '#2196F3', '#FFEB3B', '#9C27B0']
+        console.debug('Current Player in bar:', currentPlayer);
         document.getElementById('player-bar').textContent = `${players[currentPlayer]}'s Turn`;
+        document.getElementById('player-bar').style.backgroundColor = hex_colors[currentPlayer];
     }
 }
 
@@ -72,7 +75,9 @@ document.getElementById('roll-dice-btn').addEventListener('click', function () {
         console.debug('Current Player:', currentPlayer);
         updatePlayerTurn();  // Update the player turn UI
     })
-    .catch(error => console.error('Error during dice roll:', error));
+    .catch(error =>
+    {console.error('Error during dice roll:', error)
+    showToaster('Error during dice roll.', 'negative');});
 });
 
 
@@ -145,7 +150,7 @@ document.getElementById('submit-exchange').addEventListener('click', function() 
             payload.receive_count = receiveCount;
             payload.recipient = 'main-herd';
         } else {
-            alert('Please select a valid exchange option.');
+            showToaster('Please select a valid exchange option.', "informative");
             return;
         }
     } else {
@@ -176,17 +181,20 @@ function sendExchangeRequest(url, payload) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert("Exchange completed!");
+            showToaster("Exchange post completed!", "positive");
             updateHerd(data.player_herd, 'player-herd');  // Update player's herd
             updateHerd(data.main_herd, 'main-herd');      // Update main herd
             if (payload.recipient !== 'main-herd') {
+                showToaster("Waiting for other player to accept...", "informative");
                 refreshPendingRequests();  // Refresh pending requests if necessary
             }
         } else {
-            alert("Exchange failed.");
+            showToaster("Exchange failed.", "informative");
         }
     })
-    .catch(error => console.error('Error processing exchange:', error));
+    .catch(error =>
+    {console.error('Error processing exchange:', error)
+    showToaster('Error processing exchange.', 'negative');});
 }
 
 // Function to update the herd display
@@ -197,6 +205,7 @@ function updateHerd(herdData, herdElementId) {
         animalCountElement.textContent = herdData[animal];
     }
 }
+
 // Initialize the game manager on page load
 document.getElementById('forfeit-btn').addEventListener('click', function() {
     resetGameManager();
@@ -210,9 +219,12 @@ function refreshPendingRequests() {
         .then(response => response.json())
         .then(data => {
             if (data.requests.length > 0) {
-                document.getElementById('pending-requests').style.display = 'block';
+                //document.getElementById('pending-requests').style.display = 'block';
                 const requestsList = document.getElementById('requests-list');
-                //requestsList.innerHTML = '';  // Clear the list before adding new items
+                // Clear the list before adding new items
+                while (requestsList.firstChild) {
+                    requestsList.removeChild(requestsList.firstChild);
+                    }
 
                 data.requests.forEach(request => {
                     console.debug('Request:', request); //{from_animal: 'Sheep', give_count: 1, receive_count: 10, requestor_name: 'Writing', to_animal: 'Rabbit'}from_animal: "Sheep"give_count: 1receive_count: 10requestor_name: "Writing"to_animal: "Rabbit"[[Prototype]]: Object
@@ -225,7 +237,8 @@ function refreshPendingRequests() {
 
                     const requestItem = document.createElement('li');
                     requestItem.className = 'request-item';
-                    requestItem.textContent = 'Request from ' + request.requestor_name + ': ' + request.give_amount + ' ' + request.give_animal + ' for ' + request.receive_amount + ' ' + request.receive_animal ;
+                    //{from_animal: 'Rabbit', give_count: 1, receive_amount: 1, requestor_name: 'Writing', to_animal: 'Sheep'}from_animal: "Rabbit"give_count: 1receive_amount: 1requestor_name: "Writing"to_animal: "Sheep"[[Prototype]]: Object
+                    requestItem.textContent = 'Request from ' + request.requestor_name + ': ' + request.give_count + ' ' + request.from_animal + ' for ' + request.receive_count + ' ' + request.to_animal;
                     requestItem.appendChild(acceptButton); // Add the Accept button to the list item
                     requestsList.appendChild(requestItem);
                 });
@@ -233,17 +246,21 @@ function refreshPendingRequests() {
                 document.getElementById('pending-requests').style.display = 'none';
             }
         })
-        .catch(error => console.error('Error fetching pending requests:', error));
+        .catch(error => {
+        console.error('Error fetching pending requests:', error)
+        showToaster('Error fetching pending requests.', 'negative');
+        });
+        }
 
         // Function to handle the acceptance of an exchange request
     function acceptExchangeRequest(request) {
     const payload = {
         player_index: currentPlayer,
         requestor_name: request.requestor_name,
-        from_animal: request.give_animal,
-        give_count: request.receive_amount,
-        to_animal: request.receive_animal,
-        receive_count: request.receive_amount
+        from_animal: request.from_animal,
+        give_count: request.give_count,
+        to_animal: request.to_animal,
+        receive_count: request.receive_count
     };
 
     fetch('/accept-exchange-request', {
@@ -254,16 +271,34 @@ function refreshPendingRequests() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert("Exchange accepted!");
+            showToaster("Exchange accepted!", "positive");
             updateHerd(data.player_herd, 'player-herd');  // Update player's herd
-            updateHerd(data.main_herd, 'main-herd');      // Update main herd
+            updateHerd(data.other_player_herd, 'other-player-herd');  // Update other player's herd
             refreshPendingRequests();  // Refresh pending requests
         } else {
-            alert("Failed to accept exchange.");
+            showToaster("Failed to accept exchange.", "informative");
         }
     })
-    .catch(error => console.error('Error accepting exchange:', error));
-}
+    .catch(error =>
+    {console.error('Error accepting exchange:', error)
+    showToaster('Error accepting exchange.', 'negative');});
+    }
+
+// Function to show a toaster message
+    function showToaster(message, type) {
+    const toasterContainer = document.getElementById('toaster-container');
+    const toaster = document.createElement('div');
+    toaster.className = `toaster ${type}`;
+    toaster.textContent = message;
+
+    toasterContainer.appendChild(toaster);
+
+    console.debug(message);
+
+    // Remove the toaster after the animation ends
+    setTimeout(() => {
+        toasterContainer.removeChild(toaster);
+    }, 5000);
 }
 
 

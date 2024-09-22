@@ -142,68 +142,73 @@ class GameManager:
             return False
 
     def process_exchange(self, player1: Player, player2: Union[Player, None], give_animal: str, receive_animal: str,
-                         ratio: float) -> bool:
+                         amount_offered: int, amount_wanted: int) -> bool:
         """
         Process an exchange between two players or a player and the main herd.
         """
         print(f"Players exchange: {player1.name}")
         try:
-            count1 = int(player1.get_herd().get(give_animal, 0))
-            ratio = float(ratio)
+            amount_offered = int(amount_offered)
+            amount_wanted = int(amount_wanted)
         except ValueError:
-            print("Error: Invalid count or ratio value.")
+            print("Error: Invalid amount offered or wanted value.")
             return False
 
+        ratio = amount_offered / amount_wanted
+
         if ratio >= 1:
-            return self._process_normal_exchange(player1, player2, give_animal, receive_animal, ratio, count1)
+            return self._process_normal_exchange(player1, player2, give_animal, receive_animal, ratio, amount_offered,
+                                                 amount_wanted)
         else:
-            return self._process_inverted_exchange(player1, player2, give_animal, receive_animal, ratio, count1)
+            return self._process_inverted_exchange(player1, player2, give_animal, receive_animal, ratio, amount_offered,
+                                                   amount_wanted)
 
     def _process_normal_exchange(self, player1: Player, player2: Union[Player, None], give_animal: str,
-                                 receive_animal: str, ratio: float, count1: int) -> bool:
+                                 receive_animal: str, ratio: float, amount_offered: int, amount_wanted) -> bool:
         # Normal exchange
         print(f"Processing exchange: {give_animal} -> {receive_animal} with ratio {ratio}")
         print(f"Player1 herd: {player1.get_herd()}")
-        print(f"Player1 has {count1} {give_animal}(s)")
+        print(f"Player1 has {amount_offered} {give_animal}(s)")
 
-        count2 = int(count1 // ratio)
+        # count2 = int(count1 // ratio)
         if isinstance(player2, Player):
             print(f"Player2 herd: {player2.get_herd()}")
-            print(f"Player2 needs {count2} {receive_animal}(s)")
-            if count1 >= ratio and player2.get_herd().get(receive_animal, 0) >= count2:
-                return player1.transfer_to(player2, give_animal, int(ratio)) and player2.transfer_to(player1,
-                                                                                                     receive_animal,
-                                                                                                     count2)
+            print(f"Player2 needs {amount_wanted} {receive_animal}(s)")
+            if player1.get_herd().get(give_animal, 0) >= amount_offered and player2.get_herd().get(receive_animal,
+                                                                                                   0) >= amount_wanted:
+                return player1.transfer_to(player2, give_animal, amount_offered) and player2.transfer_to(player1,
+                                                                                                         receive_animal,
+                                                                                                         amount_wanted)
         else:
             print(f"Main Herd: {self.main_herd.get_herd()}")
-            print(f"Main Herd needs {count2} {receive_animal}(s)")
-            if count1 >= ratio and self.main_herd.get_herd().get(receive_animal, 0) >= count2:
-                return player1.transfer_to(self.main_herd, give_animal, int(ratio)) and self.main_herd.transfer_to(
-                    player1, receive_animal, count2)
+            print(f"Main Herd needs {amount_wanted} {receive_animal}(s)")
+            if player1.get_herd().get(give_animal, 0) >= amount_offered and self.main_herd.get_herd().get(
+                    receive_animal, 0) >= amount_wanted:
+                return player1.transfer_to(self.main_herd, give_animal, amount_offered) and self.main_herd.transfer_to(
+                    player1, receive_animal, amount_wanted)
         return False
 
     def _process_inverted_exchange(self, player1: Player, player2: Union[Player, None], give_animal: str,
-                                   receive_animal: str, ratio: float, count1: int) -> bool:
+                                   receive_animal: str, ratio: float, amount_offered: int, amount_wanted: int) -> bool:
         # If ratio is less than 1, swap the animals and adjust the ratio
         ratio = 1 / ratio
-        count2 = int(count1 * ratio)
         print(f"Processing inverted exchange: {give_animal} -> {receive_animal} with ratio {ratio}")
         print(f"Player1 herd: {player1.get_herd()}")
-        print(f"Player1 has {count1} {give_animal}(s)")
+        print(f"Player1 offers {amount_offered} {give_animal}(s)")
 
         if isinstance(player2, Player):
             print(f"Player2 herd: {player2.get_herd()}")
-            print(f"Player2 needs {count2} {receive_animal}(s)")
-            if count1 >= 1 and player2.get_herd().get(receive_animal, 0) >= count2:
-                return player1.transfer_to(player2, give_animal, 1) and player2.transfer_to(player1, receive_animal,
-                                                                                            count2)
+            print(f"Player2 needs {amount_wanted} {receive_animal}(s)")
+            if amount_offered >= 1 and player2.get_herd().get(receive_animal, 0) >= amount_wanted:
+                return player1.transfer_to(player2, give_animal, amount_offered) and player2.transfer_to(player1,
+                                                                                                         receive_animal,
+                                                                                                         amount_wanted)
         else:
             print(f"Main Herd: {self.main_herd.get_herd()}")
-            print(f"Main Herd needs {count2} {receive_animal}(s)")
-            if count1 >= 1 and self.main_herd.get_herd().get(receive_animal, 0) >= count2:
-                return player1.transfer_to(self.main_herd, give_animal, 1) and self.main_herd.transfer_to(player1,
-                                                                                                          receive_animal,
-                                                                                                          count2)
+            print(f"Main Herd needs {amount_wanted} {receive_animal}(s)")
+            if amount_offered >= 1 and self.main_herd.get_herd().get(receive_animal, 0) >= amount_wanted:
+                return player1.transfer_to(self.main_herd, give_animal, amount_offered) and self.main_herd.transfer_to(
+                    player1, receive_animal, amount_wanted)
         return False
 
     def post_exchange_request(self, requestor: Player, from_animal: str, to_animal: str, count1: int,
@@ -242,10 +247,14 @@ class GameManager:
             if requestor.get_herd().get(request.from_animal, 0) >= request.amount_wanted:
                 # Execute the exchange using the stored amounts and ratio in the request
                 request.status = "accepted"
-                return self.process_exchange(requestor, recipient, request.from_animal, request.to_animal,
-                                             request.ratio)
+                success = self.process_exchange(requestor, recipient, request.from_animal, request.to_animal,
+                                                request.amount_offered, request.amount_wanted)
+                if success:
+                    self.exchange_requests.remove(request)
+                return success
             else:
                 request.status = "invalid"
+                self.exchange_requests.remove(request)
                 return False
         return False
 
