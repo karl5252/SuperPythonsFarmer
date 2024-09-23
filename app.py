@@ -23,7 +23,13 @@ def get_game_manager():
 def main_menu():
     """Render the main game page."""
     return render_template('main_menu.html')
-
+    
+@app.route('/process-menu', methods=['POST'])
+def process_menu():
+    """Process the player's menu choice."""
+    choice = request.json.get('choice')
+    result = game_manager.process_menu_choice(choice)
+    return jsonify(message=result)
 
 @app.route('/start-game', methods=['POST'])
 def start_game():
