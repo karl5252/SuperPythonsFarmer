@@ -109,6 +109,17 @@ class GameManager:
 
         )
 
+    def process_menu_choice(self, choice):
+        """Process the player's menu choice."""
+        if choice == "1":
+            return self.show_instructions()
+        elif choice == "2":
+            return self.start_game()
+        elif choice == "3":
+            return "Exiting game."
+        else:
+            return "Invalid choice."
+
     def start_game(self):
         """Start the game."""
         self.state = GameState.IN_GAME
