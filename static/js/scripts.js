@@ -344,6 +344,18 @@ document.addEventListener('DOMContentLoaded', function() {
             showToaster('Error fetching exchange rules.', 'negative');
         });
 });
+        // Instructions Button
+        $('#instructions-btn').click(function() {
+            $.ajax({
+                url: '/process-menu',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ choice: '1' }),  // '1' for instructions
+                success: function(data) {
+                    $('#instructions').html(data.message.replace(/\n/g, '<br>')).show();  // Show instructions
+                }
+            });
+        });
 
 function populateExchangeOptions(rules) {
     const mainHerdExchangeDiv = document.getElementById('main-herd-exchange');
