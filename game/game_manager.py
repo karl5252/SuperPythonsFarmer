@@ -84,6 +84,31 @@ class GameManager:
         player = Player(name, index)
         self.players.append(player)
 
+    def show_instructions(self):
+        """Return game instructions as a string instead of printing."""
+        return (
+            "Super Farmer Game Instructions:\n"
+            "1. Roll the dice to determine the animals you get.\n"
+            "2. Each face of the dice represents a different animal:\n"
+            " - Cow, Pig, Rabbit, Sheep, Wolf, Fox, Horse.\n"
+            "3. The first animals of a given type are obtained by rolling two of the same animal.\n"
+            "4. If you have a pair of animals, you get the number of pairs instead of one.\n"
+            "5. Exchange rules:\n"
+            " - 6 Rabbits = 1 Sheep\n"
+            " - 2 Sheep = 1 Pig\n"
+            " - 3 Pigs = 1 Cow\n"
+            " - 2 Cows = 1 Horse\n"
+            " - 1 Sheep = 1 Foxhound\n"
+            " - 1 Cow = 1 Wolfhound\n"
+            "6. The first Cow and Horse can only be obtained via exchange.\n"
+            "7. Beware of the Wolf - it eats all animals except Horses. Use a Wolfhound to chase it away.\n"
+            "8. The Fox eats all Rabbits unless you have a Foxhound.\n"
+            "9. Goals: Collect all types of animals to win!\n"
+            "10. Enjoy the game and have fun!\n\n\n"
+            "Visit my blog for more details: https://www.qabites.blog/\n\n\n"
+
+        )
+
     def start_game(self):
         """Start the game."""
         self.state = GameState.IN_GAME
